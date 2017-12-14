@@ -27,4 +27,10 @@ public class SolrCorrectionController
     {
         return correctionSolrService.getCorrectionName(sentence);
     }
+    
+    @RequestMapping(value="/getLikelyName", method = RequestMethod.GET)
+    public String getLikelyName(@RequestParam(value="text", required=true) String sentence)
+    {
+        return correctionSolrService.getLikelyName(sentence);
+    }
 }

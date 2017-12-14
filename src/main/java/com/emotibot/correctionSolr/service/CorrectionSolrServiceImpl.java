@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.step.CorrectionStep;
+import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.middleware.context.Context;
 import com.emotibot.middleware.utils.StringUtils;
 
@@ -38,6 +39,13 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
         String result = getCorrection(context);
         return result;
     }
+    
+    @Override
+    public String getLikelyName(String text)
+    {
+        text = CorrectionUtils.getLikelyCorrection(text);
+        return text;
+    }
 
     private void correctionSentence(Context context)
     {
@@ -56,4 +64,5 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
         }
         return ret;
     }
+
 }
