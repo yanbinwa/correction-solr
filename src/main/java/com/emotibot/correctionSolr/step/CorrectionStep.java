@@ -127,9 +127,15 @@ public class CorrectionStep extends AbstractStep
         {
             return;
         }
-        context.setValue(Constants.CORRECTION_SENTENCE_KEY, ret.toString());
         //context.setValue(Constants.CORRECTION_SENTENCE_KEY, ret.get(0).getResult());
+        String output = "";
+        for (ResultElement element : ret)
+        {
+            output += element.getResult() + ",";
+        }
+        output = output.substring(0, output.length() - 1);
         logger.debug("Sorted list: " + ret);
+        context.setValue(Constants.CORRECTION_SENTENCE_KEY, output);
         long end = System.currentTimeMillis();
         System.out.println("cost: [" + (end - start) + "]ms");
     }
@@ -144,7 +150,7 @@ public class CorrectionStep extends AbstractStep
         {
             return new ArrayList<ResultElement>();
         }
-        float scoreThreshold = Math.min(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE, Constants.SCORE_THRESHOLD);
+        float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE, Constants.SCORE_THRESHOLD);
         float scoreDiff = Float.MAX_VALUE;
         List<ResultElement> potentialResult = new ArrayList<ResultElement>();
         potentialResult.add(resultElements.get(0));
