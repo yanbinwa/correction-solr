@@ -1,7 +1,5 @@
 package com.emotibot.correctionSolr.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,6 +12,7 @@ import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.step.CorrectionStep;
 import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.middleware.context.Context;
+import com.google.gson.JsonArray;
 
 /**
  * 将text生成不同的QueryElement，并行调用得到结果
@@ -56,13 +55,12 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
         logger.info("correctionStep: [" + (endTime - startTime) + "]ms");
     }
     
-    @SuppressWarnings("unchecked")
     private String getCorrection(Context context)
     {
-        List<String> ret = (List<String>) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
+        JsonArray ret = (JsonArray) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
         if (ret == null)
         {
-            ret = new ArrayList<String>();
+            ret = new JsonArray();
         }
         return ret.toString();
     }

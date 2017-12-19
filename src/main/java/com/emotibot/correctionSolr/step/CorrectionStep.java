@@ -26,6 +26,7 @@ import com.emotibot.correctionSolr.utils.SolrUtils;
 import com.emotibot.middleware.context.Context;
 import com.emotibot.middleware.response.Response;
 import com.emotibot.middleware.step.AbstractStep;
+import com.google.gson.JsonArray;
 
 /**
  * 生成不同的query，分配到task中
@@ -128,7 +129,7 @@ public class CorrectionStep extends AbstractStep
             return;
         }
         //context.setValue(Constants.CORRECTION_SENTENCE_KEY, ret.get(0).getResult());
-        List<String> output = new ArrayList<String>();
+        JsonArray output = new JsonArray();
         for (ResultElement element : ret)
         {
             output.add(element.getResult());
