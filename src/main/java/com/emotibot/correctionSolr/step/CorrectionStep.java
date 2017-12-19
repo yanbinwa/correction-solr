@@ -128,12 +128,11 @@ public class CorrectionStep extends AbstractStep
             return;
         }
         //context.setValue(Constants.CORRECTION_SENTENCE_KEY, ret.get(0).getResult());
-        String output = "";
+        List<String> output = new ArrayList<String>();
         for (ResultElement element : ret)
         {
-            output += element.getResult() + ",";
+            output.add(element.getResult());
         }
-        output = output.substring(0, output.length() - 1);
         logger.debug("Sorted list: " + ret);
         context.setValue(Constants.CORRECTION_SENTENCE_KEY, output);
         long end = System.currentTimeMillis();

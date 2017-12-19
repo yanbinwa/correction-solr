@@ -1,5 +1,7 @@
 package com.emotibot.correctionSolr.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,7 +14,6 @@ import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.step.CorrectionStep;
 import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.middleware.context.Context;
-import com.emotibot.middleware.utils.StringUtils;
 
 /**
  * 将text生成不同的QueryElement，并行调用得到结果
@@ -55,14 +56,15 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
         logger.info("correctionStep: [" + (endTime - startTime) + "]ms");
     }
     
+    @SuppressWarnings("unchecked")
     private String getCorrection(Context context)
     {
-        String ret = (String) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
-        if (StringUtils.isEmpty(ret))
+        List<String> ret = (List<String>) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
+        if (ret == null)
         {
-            return "无法找到相应电影";
+            ret = new ArrayList<String>();
         }
-        return ret;
+        return ret.toString();
     }
 
 }
