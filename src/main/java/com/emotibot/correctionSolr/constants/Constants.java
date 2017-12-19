@@ -39,9 +39,11 @@ public class Constants
     public static final String SOLR_SENTENCE_FIELD = "sentence";
     public static final String SOLR_SENTENCE_SYN_FIELD = "sentence_syn";
     
-    public static final float SCORE_THRESHOLD_RATE = 3 / 1.0f;
+    public static final float SCORE_THRESHOLD_RATE_PROTENTIAL = 3 / 1.0f;
+    public static final float SCORE_THRESHOLD_RATE_RECOMMEND = 2 / 1.0f;
     public static final float SCORE_THRESHOLD = 2.0f;
-    public static final int RECOMMEND_NUM = 5;
+    public static final int RECOMMEND_NUM = 3;
+    public static final int POTENTIAL_NUM = 5;
     
     public static final float SYN_WORD_ADJUST_THRESHOLD = 4.0f;
     public static final float SYN_WORD_ADJUST_RATE = 1.0f;

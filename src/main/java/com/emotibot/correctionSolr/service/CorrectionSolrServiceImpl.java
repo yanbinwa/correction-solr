@@ -12,6 +12,7 @@ import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.step.CorrectionStep;
 import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.middleware.context.Context;
+import com.emotibot.middleware.utils.StringUtils;
 import com.google.gson.JsonArray;
 
 /**
@@ -57,12 +58,12 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
     
     private String getCorrection(Context context)
     {
-        JsonArray ret = (JsonArray) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
-        if (ret == null)
+        String ret = (String) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
+        if (StringUtils.isEmpty(ret))
         {
-            ret = new JsonArray();
+            ret = new JsonArray().toString();
         }
-        return ret.toString();
+        return ret;
     }
 
 }
