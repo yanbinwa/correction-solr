@@ -41,9 +41,12 @@ public class Constants
     
     public static final float SCORE_THRESHOLD_RATE_PROTENTIAL = 3 / 1.0f;
     public static final float SCORE_THRESHOLD_RATE_RECOMMEND = 2 / 1.0f;
-    public static final float SCORE_THRESHOLD = 2.0f;
+    public static final float SCORE_THRESHOLD_PROTENTIAL = 2.0f;
+    public static final float SCORE_THRESHOLD_RECOMMEND = 1.0f;
     public static final int RECOMMEND_NUM = 3;
     public static final int POTENTIAL_NUM = 5;
+    public static final float SCORE_THRESHOLD_DIFF_PROTENTIAL = 0.3f;
+    public static final float SCORE_THRESHOLD_DIFF_RECOMMEND = 0.3f;
     
     public static final float SYN_WORD_ADJUST_THRESHOLD = 4.0f;
     public static final float SYN_WORD_ADJUST_RATE = 1.0f;

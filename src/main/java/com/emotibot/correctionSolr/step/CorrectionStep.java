@@ -52,7 +52,7 @@ public class CorrectionStep extends AbstractStep
     public void beforeRun(Context context)
     {
         String sentence = (String) context.getValue(Constants.SENTENCE_KEY);
-        sentence = CorrectionUtils.getLikelyCorrection(sentence);
+        sentence = CorrectionUtils.getLikelyCorrection2(sentence);
         if (StringUtils.isEmpty(sentence))
         {
             return;
@@ -125,6 +125,10 @@ public class CorrectionStep extends AbstractStep
         String sentence = (String) context.getValue(Constants.SENTENCE_LIKELY_KEY);
         ret = getAdjustResult(ret, sentence);
         logger.debug("Output list: " + ret);
+        if (ret == null || ret.isEmpty())
+        {
+            return;
+        }
 //        context.setValue(Constants.CORRECTION_SENTENCE_KEY, ret.get(0).getResult());
         JsonArray output = new JsonArray();
         for (ResultElement element : ret)
@@ -136,24 +140,25 @@ public class CorrectionStep extends AbstractStep
         System.out.println("cost: [" + (end - start) + "]ms");
     }
 
+    //当分差不足特定数值，认为也是有效的（0.2）
     private List<ResultElement> getPotentialResult(List<ResultElement> resultElements)
     {
         if (resultElements.size() <= 0)
         {
             return resultElements;
         }
-        if (resultElements.get(0).getScore() < Constants.SCORE_THRESHOLD)
+        if (resultElements.get(0).getScore() < Constants.SCORE_THRESHOLD_PROTENTIAL)
         {
             return new ArrayList<ResultElement>();
         }
-        float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE_PROTENTIAL, Constants.SCORE_THRESHOLD);
+        float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE_PROTENTIAL, Constants.SCORE_THRESHOLD_PROTENTIAL);
         float scoreDiff = Float.MAX_VALUE;
         List<ResultElement> potentialResult = new ArrayList<ResultElement>();
         potentialResult.add(resultElements.get(0));
         for (int i = 1; i < resultElements.size(); i ++)
         {
             float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
-            if (resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff)
+            if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
             {
                 break;
             }
@@ -188,14 +193,15 @@ public class CorrectionStep extends AbstractStep
             return null;
         }
         //再来一次梯度下降
-        float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE_RECOMMEND, Constants.SCORE_THRESHOLD);
+        float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE_RECOMMEND, Constants.SCORE_THRESHOLD_RECOMMEND);
         float scoreDiff = Float.MAX_VALUE;
         List<ResultElement> potentialResult = new ArrayList<ResultElement>();
         potentialResult.add(resultElements.get(0));
         for (int i = 1; i < resultElements.size(); i ++)
         {
             float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
-            if (resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff)
+            
+            if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
             {
                 break;
             }

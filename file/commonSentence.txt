@@ -2,7 +2,7 @@
 XXX给我来一下
 XXX来一个
 XXX有吗
-XXX有木有？
+XXX有木有
 XXX找得到吗
 XXX这部电影
 把XXX搜出来
@@ -328,7 +328,6 @@ XXX这部电影
 有没有XXX可以看
 有最新的XXX吗
 怎么没有XXX的片子
-怎能不看XXX？
 展示XXX
 展示XXX这部电影
 找XXX来看
@@ -348,7 +347,7 @@ XXX这部电影
 可以把XXX给我看
 播那个XXX
 放XXX
-我想看XXX
+我想看XXX电视剧
 我打算看XXX
 是否能放XXX
 我选择看XXX
@@ -357,8 +356,12 @@ XXX这部电影
 将XXX播放一下
 快给我播放XXX
 放下影片XXX
-为我播放XXX
+为我播放XXX文艺片
 可不可以给我放XXX
 能不能播放XXX
-是不是能放XXX
-还是看XXX
+是不是能放XXX那部片子
+还是看XXX动画
+哪里有XXX的片源
+XXX这个片能放一下吗
+XXX放给我看下
+XXX可不可以播一下

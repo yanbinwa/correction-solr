@@ -14,7 +14,7 @@ import com.emotibot.correctionSolr.element.ResultElement;
 
 public class SolrUtilsTest
 {
-    public static final String VIDEO_NAME = "大话西游";
+    public static final String VIDEO_NAME = "超星星学院";
     
     public static final String SINGLE_WORD_DATABASE = "singleWord";
     public static final String WORD_DATABASE = "word";
@@ -28,7 +28,7 @@ public class SolrUtilsTest
     @Test
     public void test()
     {
-        test5();
+        test6();
     }
     
     @SuppressWarnings("unused")
@@ -133,5 +133,11 @@ public class SolrUtilsTest
         QueryElement queryEle = QueryElementUtils.getQueryElement(text, DatabaseType.WORD_SYN_DATABASE);
         List<ResultElement> retEles = SolrUtils.querySolrData(queryEle, "sentence_original");
         System.out.println(retEles);
+    }
+    
+    @SuppressWarnings("unused")
+    private void test6()
+    {
+        SolrUtils.loadSynonymToSolr();
     }
 }
