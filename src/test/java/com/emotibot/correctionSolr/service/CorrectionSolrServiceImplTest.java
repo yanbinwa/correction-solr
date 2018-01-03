@@ -20,7 +20,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class CorrectionSolrServiceImplTest
 {
-    public static final String correctionFile = "/Users/emotibot/Documents/workspace/other/correction-solr/file/自动纠错4.csv";
+    public static final String correctionFile = "/Users/emotibot/Documents/workspace/other/correction-solr/file/自动纠错5.csv";
 
     public static final String service_url = "http://localhost:9100/correction/postCorrectionName";
     
@@ -28,6 +28,7 @@ public class CorrectionSolrServiceImplTest
     
     public static int totalCount = 0;
     public static int errorTotalCount = 0;
+    public static int emptyCount = 0;
     
     @Test
     public void test()
@@ -36,7 +37,8 @@ public class CorrectionSolrServiceImplTest
         test1();
         long endTime = System.currentTimeMillis();
         System.out.println("用时：[" + (endTime - startTime) + "ms]");
-        System.out.println("totalCount: " + totalCount + "; errorCount: " + errorTotalCount + "; errorRate: " + (errorTotalCount / (double)totalCount));
+        System.out.println("totalCount: " + totalCount + "; errorCount: " + errorTotalCount + "; emptyCount: " + emptyCount);
+        System.out.println("errorRate: " + (errorTotalCount / (double)totalCount) + "; emptyRate: " + (emptyCount / (double)errorTotalCount));
     }
 
     @SuppressWarnings("unused")
@@ -66,8 +68,11 @@ public class CorrectionSolrServiceImplTest
                 if (!isCorrected(result, correctSentence))
                 {
                     System.out.println("correct: " + correctSentence + "; error: " + errorSentence + "; result: " + result);
-                    //System.out.println(correctSentence);
                     errorTotalCount ++;
+                    if (isEmpty(result))
+                    {
+                        emptyCount ++;
+                    }
                 }
             }
         }
@@ -152,5 +157,13 @@ public class CorrectionSolrServiceImplTest
             }
         }
         return false;
+    }
+    
+    private boolean isEmpty(String result)
+    {
+        result = result.replace("[", "");
+        result = result.replace("]", "");
+        result = result.replace("\"", "");
+        return "".equals(result.trim());
     }
 }

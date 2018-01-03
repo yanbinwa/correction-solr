@@ -135,7 +135,7 @@ public class SynonymServiceImpl implements SynonymService
                 
                 if (StringUtils.isEmpty(appid) || !appid.equals(this.appid))
                 {
-                    logger.info("当前appid不是目标appid：" + this.appid);
+                    logger.info("appid为空或者不是目标appid：" + this.appid);
                     return;
                 }
                 

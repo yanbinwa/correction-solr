@@ -56,7 +56,6 @@ public class CorrectionStep extends AbstractStep
         if (StringUtils.isEmpty(sentence))
         {
             return;
-            //sentence = (String) context.getValue(Constants.SENTENCE_KEY);
         }
         context.setValue(Constants.SENTENCE_LIKELY_KEY, sentence);
         System.out.println(sentence);
@@ -107,6 +106,10 @@ public class CorrectionStep extends AbstractStep
                     {
                         resultElementMap.put(resultEle.getResult(), resultEle);
                     }
+                    else if (resultEle.getScore() == oldEle.getScore() && resultEle.getDatabase() != DatabaseType.WORD_SYN_DATABASE)
+                    {
+                        resultElementMap.put(resultEle.getResult(), resultEle);
+                    }
                 }
                 else
                 {
@@ -129,7 +132,6 @@ public class CorrectionStep extends AbstractStep
         {
             return;
         }
-//        context.setValue(Constants.CORRECTION_SENTENCE_KEY, ret.get(0).getResult());
         JsonArray output = new JsonArray();
         for (ResultElement element : ret)
         {
@@ -158,7 +160,7 @@ public class CorrectionStep extends AbstractStep
         for (int i = 1; i < resultElements.size(); i ++)
         {
             float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
-            if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
+            if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL && i >= Constants.POTENTIAL_NUM)
             {
                 break;
             }
@@ -175,20 +177,36 @@ public class CorrectionStep extends AbstractStep
     /**
      * 通过编辑距离来进行调节
      * 
+     * 需要降低召回率，所以要进行细化
+     * 
+     * 1. 判断所有元素是否全部匹配（不按顺序）但需要考虑拼音，或者是否目标元素完全包含，求出差异结果（颠倒）
+     * 2. 通过编辑距离计算结果（相似度）
+     * 3. 是否通过同义词库得到的结果（）
+     * 
+     * 从三方面得到的结果与之前的结果进行组合后得到最终结果
+     * 
      * @param resultElements
      * @return
      */
+    @SuppressWarnings("unused")
     private List<ResultElement> getAdjustResult(List<ResultElement> resultElements, String sentence)
     {
         SentenceElement targetElement = new SentenceElement(sentence);
         for (ResultElement retElement : resultElements)
         {
             SentenceElement element = new SentenceElement(retElement.getResult());
-            float distance = (float)EditDistanceUtils.getEditDistance(element, targetElement);
-            retElement.setScore(retElement.getScore() - distance * Constants.DISTANCE_RATE);
+            float distanceWithoutOrder = getDistanceWithoutOrder(element, targetElement) * Constants.DISTANCE_WITHOUT_ORDER_RATE;
+            float distance = (float) EditDistanceUtils.getEditDistance(element, targetElement) * Constants.DISTANCE_RATE;
+            float adjustScore = retElement.getScore() - distanceWithoutOrder - distance;
+            if (retElement.getDatabase().equals(DatabaseType.WORD_SYN_DATABASE) || retElement.getResult().length() >= 3)
+            {
+                adjustScore += Constants.DISTANCE_SYN_SCORE;
+            }
+            retElement.setScore(adjustScore);
         }
         resultElements = sortElement(resultElements);
-        if (resultElements.isEmpty())
+        logger.info("AdjustResult: " + resultElements);
+        if (resultElements.isEmpty() || resultElements.get(0).getScore() < Constants.SCORE_THRESHOLD_RECOMMEND)
         {
             return null;
         }
@@ -201,19 +219,126 @@ public class CorrectionStep extends AbstractStep
         {
             float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
             
-            if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
+            if (scoreDiffTmp > scoreDiff && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
             {
                 break;
             }
             scoreDiff = scoreDiffTmp;
             potentialResult.add(resultElements.get(i));
         }
-        if (potentialResult.size() > Constants.RECOMMEND_NUM)
-        {
-            potentialResult = potentialResult.subList(0, Constants.RECOMMEND_NUM);
-        }
+        potentialResult = getChooseResult(potentialResult);
+//        if (potentialResult.size() > Constants.RECOMMEND_NUM)
+//        {
+//            potentialResult = potentialResult.subList(0, Constants.RECOMMEND_NUM);
+//        }
         return potentialResult;
     }
+    
+    /**
+     * 1. 判断所有元素是否全部匹配（不按顺序）但需要考虑拼音，或者是否目标元素完全包含，求出差异结果（颠倒）
+     * 
+     * @param element
+     * @param targetElement
+     * @return
+     */
+    private float getDistanceWithoutOrder(SentenceElement element, SentenceElement targetElement)
+    {
+        int maxLen = Math.max(element.getLength(), targetElement.getLength());
+        int minLen = Math.min(element.getLength(), targetElement.getLength());
+        int distance1 = EditDistanceUtils.getEditDistanceWithoutOrder(element, targetElement);
+        if (distance1 == 0)
+        {
+            return Constants.DISTANCE_TOTAL_MATCH_RATE * maxLen;
+        }
+        //target完全包含在片命中，例如我想看小美好
+        else if (distance1 == (maxLen - minLen) && targetElement.getLength() == minLen && minLen >= 3)
+        {
+            return 0.0f;
+        }
+        else
+        {
+            return (distance1 + (maxLen - minLen)) * 1.0f;
+        }
+    }
+    
+    /**
+     * 当推荐的数据中有得分一致的，或者得分非常相近的，可以随机输出
+     * 
+     * @param potentialResult
+     * @return
+     */
+    @SuppressWarnings("unused")
+    private List<ResultElement> getChooseResult(List<ResultElement> potentialResult)
+    {
+        List<ResultElement> ret = new ArrayList<ResultElement>();
+        List<ResultElement> tmp = new ArrayList<ResultElement>();
+        float lastScore = potentialResult.get(0).getScore();
+        tmp.add(potentialResult.get(0));
+        for (int i = 1; i < potentialResult.size(); i ++)
+        {
+            ResultElement ele = potentialResult.get(i);
+            if (i >= Constants.RECOMMEND_NUM && (lastScore - ele.getScore()) > Constants.SCORE_THRESHOLD_DIFF_CHOOSE)
+            {
+                Collections.shuffle(tmp);
+                ret.addAll(tmp);
+                break;
+            }
+            else if ((lastScore - ele.getScore()) > Constants.SCORE_THRESHOLD_DIFF_CHOOSE)
+            {
+                Collections.shuffle(tmp);
+                ret.addAll(tmp);
+                tmp.clear();
+            }
+            tmp.add(ele);
+            lastScore = ele.getScore();
+        }
+        Collections.shuffle(tmp);
+        ret.addAll(tmp);
+        if (ret.size() > Constants.RECOMMEND_NUM)
+        {
+            ret = ret.subList(0, Constants.RECOMMEND_NUM);
+        }
+        return ret;
+    }
+    
+//    @SuppressWarnings("unused")
+//    private List<ResultElement> getAdjustResult1(List<ResultElement> resultElements, String sentence)
+//    {
+//        SentenceElement targetElement = new SentenceElement(sentence);
+//        for (ResultElement retElement : resultElements)
+//        {
+//            SentenceElement element = new SentenceElement(retElement.getResult());
+//            float distance = (float)EditDistanceUtils.getEditDistance(element, targetElement);
+//            retElement.setScore(retElement.getScore() - distance * Constants.DISTANCE_RATE);
+//        }
+//        resultElements = sortElement(resultElements);
+//        if (resultElements.isEmpty() || resultElements.get(0).getScore() < Constants.SCORE_THRESHOLD_RECOMMEND)
+//        {
+//            return null;
+//        }
+//        //再来一次梯度下降
+//        float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE_RECOMMEND, Constants.SCORE_THRESHOLD_RECOMMEND);
+//        float scoreDiff = Float.MAX_VALUE;
+//        List<ResultElement> potentialResult = new ArrayList<ResultElement>();
+//        potentialResult.add(resultElements.get(0));
+//        for (int i = 1; i < resultElements.size(); i ++)
+//        {
+//            float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
+//            
+//            if (scoreDiffTmp > scoreDiff && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
+//            //if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
+//            {
+//                break;
+//            }
+//            scoreDiff = scoreDiffTmp;
+//            potentialResult.add(resultElements.get(i));
+//        }
+//        if (potentialResult.size() > Constants.RECOMMEND_NUM)
+//        {
+//            potentialResult = potentialResult.subList(0, Constants.RECOMMEND_NUM);
+//        }
+//        return potentialResult;
+//    }
     
     private List<ResultElement> sortElement(List<ResultElement> result)
     {
