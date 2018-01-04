@@ -28,10 +28,11 @@ import com.google.gson.JsonObject;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+
 public class CorrectionSolrServiceImplTest
 {
     public static final String correctionFile = "/Users/emotibot/Documents/workspace/other/correction-solr/file/长虹纠错.csv";
-    public static final String service_url = "http://localhost:9100/correction/postCorrectionName";
+    public static final String service_url = "http://172.16.101.61:9100/correction/postCorrectionName";
     public static final String service_url1 = "http://172.16.101.61:15901/correction/v1/";
     
     public static int totalCount = 0;
