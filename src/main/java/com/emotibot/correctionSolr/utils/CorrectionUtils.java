@@ -53,6 +53,8 @@ public class CorrectionUtils
     private static Map<String, StopWordElement> commonStartWordCountMap = new HashMap<String, StopWordElement>();
     private static Map<String, StopWordElement> commonEndWordCountMap = new HashMap<String, StopWordElement>();
     
+    private static String[] pronouns = {"我", "你", "他", "她", "它"};
+    
     static 
     {
         initCommonWordCountMap();
@@ -121,6 +123,11 @@ public class CorrectionUtils
         }
     }
     
+    
+    /**
+     * 加入token
+     * 
+     */
     private static void initCommonBeginAndEndWordMap()
     {
         if (StringUtils.isEmpty(commonSentenceTargetFilePath))
@@ -273,90 +280,6 @@ public class CorrectionUtils
         return ret;
     }
     
-    public static String getLikelyCorrection1(String sentence)
-    {
-        String[] tokens = SegementUtils.segementString(sentence);
-        if (tokens == null)
-        {
-            return sentence;
-        }
-        boolean[] tagList = new boolean[tokens.length];
-        for (int i = 0; i < tagList.length; i ++)
-        {
-            tagList[i] = true;
-        }
-        
-        //这里是判断语句开始的
-        String beforeWord = StopWordElement.BEGIN_WORD;
-        String afterWord = null;
-        for (int i = 0; i < tokens.length; i ++)
-        {
-            String word = tokens[i];
-            if (i == tokens.length - 1 || !commonStartWordCountMap.containsKey(tokens[i + 1]))
-            {
-                afterWord = StopWordElement.END_WORD;
-            }
-            else
-            {
-                afterWord = tokens[i + 1];
-            }
-            
-            StopWordElement element = commonStartWordCountMap.get(word);
-            if (element == null)
-            {
-                break;
-            }
-            if (element.isBeforeWord(beforeWord) && element.isAfterWord(afterWord))
-            {
-                tagList[i] = false;
-                beforeWord = word;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        afterWord = StopWordElement.END_WORD;
-        beforeWord = null;
-        for (int i = tokens.length - 1; i >= 0; i --)
-        {
-            String word = tokens[i];
-            if (i == 0 || !commonEndWordCountMap.containsKey(tokens[i - 1]))
-            {
-                beforeWord = StopWordElement.BEGIN_WORD;
-            }
-            else
-            {
-                beforeWord = tokens[i - 1];
-            }
-            StopWordElement element = commonEndWordCountMap.get(word);
-            if (element == null)
-            {
-                break;
-            }
-            if (element.isBeforeWord(beforeWord) && element.isAfterWord(afterWord))
-            {
-                tagList[i] = false;
-                afterWord = word;
-            }
-            else
-            {
-                break;
-            }
-        }
-        
-        String ret = "";
-        for (int i = 0; i < tagList.length; i ++)
-        {
-            if (tagList[i])
-            {
-                ret += tokens[i];
-            }
-        }
-        return ret;
-    }
-    
     /**
      * 再做一个优化，就是如果该词在之前出现过，就认为是片名了
      * 
@@ -365,7 +288,7 @@ public class CorrectionUtils
      * @param sentence
      * @return
      */
-    public static String getLikelyCorrection2(String sentence)
+    public static String getLikelyCorrection1(String sentence)
     {
         String[] tokens = SegementUtils.segementString(sentence);
         if (tokens == null)
@@ -414,5 +337,150 @@ public class CorrectionUtils
             }
         }
         return ret;
+    }
+    
+    /**
+     * 再做一个优化，就是如果该词在之前出现过，就认为是片名了
+     * 
+     * 排除可不可以，能不能，看看的case
+     * 
+     * 有些代词会对片名有影响：我的前半生，我的三妈两爸
+     * 
+     * 当遇到代词时，判断代词左右的词是否为常用的匹配，例如“我的”就不是模板，所以可以优化，这里只对代词处理
+     * 
+     * @param sentence
+     * @return
+     */
+    public static String getLikelyCorrection2(String sentence)
+    {
+        String[] tokens = SegementUtils.segementString(sentence);
+        if (tokens == null)
+        {
+            return sentence;
+        }
+        boolean[] tagList = new boolean[tokens.length];
+        for (int i = 0; i < tagList.length; i ++)
+        {
+            tagList[i] = true;
+        }
+        
+        //这里是判断语句开始的
+        Set<String> stopWordSet = new HashSet<String>();
+        String beforeWord = StopWordElement.BEGIN_WORD;
+        String afterWord = null;
+        for (int i = 0; i < tokens.length; i ++)
+        {
+            String word = tokens[i];
+            if (isPronoun(word))
+            {
+                if (i == tokens.length - 1 || !commonStartWordCountMap.containsKey(tokens[i + 1]))
+                {
+                    afterWord = StopWordElement.END_WORD;
+                }
+                else
+                {
+                    afterWord = tokens[i + 1];
+                }
+                
+                StopWordElement element = commonStartWordCountMap.get(word);
+                if (element == null)
+                {
+                    break;
+                }
+                if (element.isBeforeWord(beforeWord) && element.isAfterWord(afterWord) && !stopWordSet.contains(word))
+                {
+                    tagList[i] = false;
+                    beforeWord = word;
+                    stopWordSet.add(word);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else
+            {
+                if (commonStartWordCountMap.containsKey(tokens[i]) && !stopWordSet.contains(tokens[i]))
+                {
+                    tagList[i] = false;
+                    stopWordSet.add(tokens[i]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        afterWord = StopWordElement.END_WORD;
+        beforeWord = null;
+        for (int i = tokens.length - 1; i >= 0; i --)
+        {
+            String word = tokens[i];
+            if (isPronoun(word))
+            {
+                if (i == 0 || !commonEndWordCountMap.containsKey(tokens[i - 1]))
+                {
+                    beforeWord = StopWordElement.BEGIN_WORD;
+                }
+                else
+                {
+                    beforeWord = tokens[i - 1];
+                }
+                StopWordElement element = commonEndWordCountMap.get(word);
+                if (element == null)
+                {
+                    break;
+                }
+                if (element.isBeforeWord(beforeWord) && element.isAfterWord(afterWord) && !stopWordSet.contains(word))
+                {
+                    tagList[i] = false;
+                    afterWord = word;
+                    stopWordSet.add(word);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else
+            {
+                if (commonEndWordCountMap.containsKey(tokens[i]) && !stopWordSet.contains(tokens[i]))
+                {
+                    tagList[i] = false;
+                    stopWordSet.add(tokens[i]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        
+        String ret = "";
+        for (int i = 0; i < tagList.length; i ++)
+        {
+            if (tagList[i])
+            {
+                ret += tokens[i];
+            }
+        }
+        return ret;
+    }
+    
+    private static boolean isPronoun(String word)
+    {
+        if (StringUtils.isEmpty(word)) 
+        {
+            return false;
+        }
+        for (int i = 0; i < pronouns.length; i ++)
+        {
+            if (pronouns[i].equals(word.trim()))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

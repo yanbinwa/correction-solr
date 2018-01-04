@@ -57,7 +57,7 @@
     <dependency>
       <groupId>com.emotibot</groupId>
       <artifactId>middleware</artifactId>
-      <version>0.1.8-SNAPSHOT</version>
+      <version>0.1.9-SNAPSHOT</version>
 	</dependency>
     <dependency>
       <groupId>log4j</groupId>
@@ -96,6 +96,11 @@
       <groupId>com.emotibot</groupId>
       <artifactId>emotibot-module-core</artifactId>
       <version>LATEST</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>3.9</version>
     </dependency>
   </dependencies>
   <build>

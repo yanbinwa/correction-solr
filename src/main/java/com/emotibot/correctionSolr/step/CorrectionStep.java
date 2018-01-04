@@ -227,15 +227,17 @@ public class CorrectionStep extends AbstractStep
             potentialResult.add(resultElements.get(i));
         }
         potentialResult = getChooseResult(potentialResult);
-//        if (potentialResult.size() > Constants.RECOMMEND_NUM)
-//        {
-//            potentialResult = potentialResult.subList(0, Constants.RECOMMEND_NUM);
-//        }
         return potentialResult;
     }
     
     /**
      * 1. 判断所有元素是否全部匹配（不按顺序）但需要考虑拼音，或者是否目标元素完全包含，求出差异结果（颠倒）
+     * 
+     * 如果target完全包含在片命中，需要判断词语的先后顺序
+     * 
+     * 小理玩具 -> 查理的玩具小屋
+     * 5 1 3   ->  命中了三个部分，而且相差较多时，认为是不存在的
+     * 
      * 
      * @param element
      * @param targetElement
@@ -253,11 +255,23 @@ public class CorrectionStep extends AbstractStep
         //target完全包含在片命中，例如我想看小美好
         else if (distance1 == (maxLen - minLen) && targetElement.getLength() == minLen && minLen >= 3)
         {
-            return 0.0f;
+            int matchParter = EditDistanceUtils.getMatchParterWithoutOrder(targetElement, element);
+            if (matchParter <= 2)
+            {
+                return 0.0f;
+            }
+            else if ((maxLen - minLen) <= 2)
+            {
+                return 0.0f;
+            }
+            else
+            {
+                return distance1 * 0.8f + (maxLen - minLen) * 1.2f;
+            }
         }
         else
         {
-            return (distance1 + (maxLen - minLen)) * 1.0f;
+            return distance1 * 0.8f + (maxLen - minLen) * 1.2f;
         }
     }
     
@@ -300,45 +314,6 @@ public class CorrectionStep extends AbstractStep
         }
         return ret;
     }
-    
-//    @SuppressWarnings("unused")
-//    private List<ResultElement> getAdjustResult1(List<ResultElement> resultElements, String sentence)
-//    {
-//        SentenceElement targetElement = new SentenceElement(sentence);
-//        for (ResultElement retElement : resultElements)
-//        {
-//            SentenceElement element = new SentenceElement(retElement.getResult());
-//            float distance = (float)EditDistanceUtils.getEditDistance(element, targetElement);
-//            retElement.setScore(retElement.getScore() - distance * Constants.DISTANCE_RATE);
-//        }
-//        resultElements = sortElement(resultElements);
-//        if (resultElements.isEmpty() || resultElements.get(0).getScore() < Constants.SCORE_THRESHOLD_RECOMMEND)
-//        {
-//            return null;
-//        }
-//        //再来一次梯度下降
-//        float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE_RECOMMEND, Constants.SCORE_THRESHOLD_RECOMMEND);
-//        float scoreDiff = Float.MAX_VALUE;
-//        List<ResultElement> potentialResult = new ArrayList<ResultElement>();
-//        potentialResult.add(resultElements.get(0));
-//        for (int i = 1; i < resultElements.size(); i ++)
-//        {
-//            float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
-//            
-//            if (scoreDiffTmp > scoreDiff && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
-//            //if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
-//            {
-//                break;
-//            }
-//            scoreDiff = scoreDiffTmp;
-//            potentialResult.add(resultElements.get(i));
-//        }
-//        if (potentialResult.size() > Constants.RECOMMEND_NUM)
-//        {
-//            potentialResult = potentialResult.subList(0, Constants.RECOMMEND_NUM);
-//        }
-//        return potentialResult;
-//    }
     
     private List<ResultElement> sortElement(List<ResultElement> result)
     {
