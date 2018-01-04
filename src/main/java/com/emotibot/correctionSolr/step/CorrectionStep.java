@@ -247,13 +247,13 @@ public class CorrectionStep extends AbstractStep
     {
         int maxLen = Math.max(element.getLength(), targetElement.getLength());
         int minLen = Math.min(element.getLength(), targetElement.getLength());
-        int distance1 = EditDistanceUtils.getEditDistanceWithoutOrder(element, targetElement);
+        float distance1 = (float) EditDistanceUtils.getEditDistanceWithoutOrder(element, targetElement);
         if (distance1 == 0)
         {
             return Constants.DISTANCE_TOTAL_MATCH_RATE * maxLen;
         }
         //target完全包含在片命中，例如我想看小美好
-        else if (distance1 == (maxLen - minLen) && targetElement.getLength() == minLen && minLen >= 3)
+        else if (distance1 <= (maxLen - minLen) && targetElement.getLength() == minLen && minLen >= 3)
         {
             int matchParter = EditDistanceUtils.getMatchParterWithoutOrder(targetElement, element);
             if (matchParter <= 2)

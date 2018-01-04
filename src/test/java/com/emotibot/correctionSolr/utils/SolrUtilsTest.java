@@ -138,6 +138,6 @@ public class SolrUtilsTest
     @SuppressWarnings("unused")
     private void test6()
     {
-        SolrUtils.loadSynonymToSolr();
+        SolrUtils.loadSynonymToSolrByFile();
     }
 }

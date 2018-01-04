@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -26,6 +27,13 @@ import com.emotibot.correctionSolr.element.ResultElement;
 import com.emotibot.middleware.conf.ConfigManager;
 import com.emotibot.middleware.utils.StringUtils;
 
+/**
+ * 
+ * 需要保存当前的片库，如果有新增，则只要增量替换，如果有删除，则需要全量替换
+ * 
+ * @author emotibot
+ *
+ */
 public class SolrUtils
 {
     private static Logger logger = Logger.getLogger(SolrUtils.class);
@@ -34,10 +42,13 @@ public class SolrUtils
     private static HttpSolrClient solrClient = null; 
     public static DatabaseType[] databaseType = {DatabaseType.SINGLE_WORD_DATABASE, DatabaseType.WORD_DATABASE, DatabaseType.WORD_SYN_DATABASE, DatabaseType.PINYING_WORD_DATABASE, DatabaseType.PINYING2_WORD_DATABASE};
         
+    public static ReentrantLock lock = new ReentrantLock();
+    public static Set<String> movieNameSet = new HashSet<String>();
+    
     static
     {
         buildSolrClient();
-        //loadSynonymToSolr();
+        //deleteAllData();
     }
     
     private static void buildSolrClient()
@@ -107,8 +118,6 @@ public class SolrUtils
         }
     }
     
-    
-    
     public static List<ResultElement> querySolrData(QueryElement query, String retField)
     {
         List<ResultElement> ret = new ArrayList<ResultElement>();
@@ -152,9 +161,72 @@ public class SolrUtils
         }
     }
     
+    public static void updateSolrData(String[] lines)
+    {
+        lock.lock();
+        try
+        {
+            Set<String> movieNameSetTmp = new HashSet<String>();
+            for (String line : lines)
+            {
+                String[] elements = line.trim().split("\t");
+                if (elements.length < 2)
+                {
+                    continue;
+                }
+
+                String levelInfo = elements[0];
+                if (MyConstants.level_infos.contains(levelInfo))
+                {
+                    String word = elements[1];
+                    movieNameSetTmp.add(word.trim());
+                }
+            }
+            Set<String> addSet = new HashSet<String>();
+            Set<String> deleteSet = new HashSet<String>();
+            
+            for (String movieName : movieNameSetTmp)
+            {
+                if (!movieNameSet.contains(movieName))
+                {
+                    addSet.add(movieName);
+                }
+            }
+            
+            for (String movieName : movieNameSet)
+            {
+                if (!movieNameSetTmp.contains(movieName))
+                {
+                    deleteSet.add(movieName);
+                }
+            }
+            
+            if (addSet.size() == 0 && deleteSet.size() == 0)
+            {
+                logger.info("not data update");
+                return;
+            }
+            logger.info("add set size is: " + addSet.size() + "; delete set is: " + deleteSet);
+            if (deleteSet.size() == 0)
+            {
+                loadSynonymToSolr(addSet, false);
+            }
+            else
+            {
+                loadSynonymToSolr(movieNameSetTmp, true);
+            }
+            movieNameSet.clear();
+            movieNameSet.addAll(movieNameSetTmp);
+        }
+        finally
+        {
+            lock.unlock();
+        }
+    }
+    
     public static void updateSynonymFile(String[] lines)
     {
-        String originalFile = ConfigManager.INSTANCE.getPropertyString(com.emotibot.correction.constants.Constants.ORIGIN_FILE_PATH);
+        String originalFile = ConfigManager.INSTANCE.getPropertyString(com.emotibot.correction.constants.Constants.ORIGIN_FILE_PATH) + ".tmp";
         FileWriter fw = null;
         try
         {
@@ -193,7 +265,7 @@ public class SolrUtils
         }
     }
     
-    public static void loadSynonymToSolr()
+    public static void loadSynonymToSolrByFile()
     {
         String originalFile = ConfigManager.INSTANCE.getPropertyString(com.emotibot.correction.constants.Constants.ORIGIN_FILE_PATH);
         Set<String> synonymSet = new HashSet<String>();
@@ -208,22 +280,7 @@ public class SolrUtils
             }
             if (synonymSet.size() > 0)
             {
-                deleteAllData();
-                List<CorrectionElement> solrDataList = new ArrayList<CorrectionElement>();
-                int count = 0;
-                for (String synonym : synonymSet)
-                {
-                    for (DatabaseType type : databaseType)
-                    {
-                        CorrectionElement element = CorrectionElementUtils.getCorrectionElement(synonym, String.valueOf(count), type);
-                        if (element != null)
-                        {
-                            solrDataList.add(element);
-                            count ++;
-                        }
-                    }
-                }
-                addSolrData(solrDataList);
+                loadSynonymToSolr(synonymSet, true);
             }
             logger.info("Solr update successful");
         }
@@ -247,6 +304,29 @@ public class SolrUtils
         }
     }
     
+    public static void loadSynonymToSolr(Set<String> synonymSet, boolean tag)
+    {
+        if (tag)
+        {
+            deleteAllData();
+        }
+        List<CorrectionElement> solrDataList = new ArrayList<CorrectionElement>();
+        int count = 0;
+        for (String synonym : synonymSet)
+        {
+            for (DatabaseType type : databaseType)
+            {
+                CorrectionElement element = CorrectionElementUtils.getCorrectionElement(synonym, String.valueOf(count), type);
+                if (element != null)
+                {
+                    solrDataList.add(element);
+                    count ++;
+                }
+            }
+        }
+        addSolrData(solrDataList);
+    }
+    
     public static void test()
     {
         
@@ -255,8 +335,9 @@ public class SolrUtils
     static class MyConstants
     {
         private static String MOVIE_INFO = "专有词库>长虹>影视>电影";
-        private static String TV_INFO = "专有词库>长虹>影视>电视剧";
-        private static String[] LEVEL_INFOS = {MOVIE_INFO, TV_INFO};
+        //private static String TV_INFO = "专有词库>长虹>影视>电视剧";
+        private static String[] LEVEL_INFOS = {MOVIE_INFO};
+        //private static String[] LEVEL_INFOS = {MOVIE_INFO, TV_INFO};
         public static Set<String> level_infos = new HashSet<String>();
         static
         {

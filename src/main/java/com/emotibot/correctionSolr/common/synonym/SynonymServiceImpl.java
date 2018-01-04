@@ -205,7 +205,7 @@ public class SynonymServiceImpl implements SynonymService
             return false;
         }
         SolrUtils.updateSynonymFile(lines);
-        SolrUtils.loadSynonymToSolr();
+        SolrUtils.updateSolrData(lines);
         this.localMD5 = remoteMD5;
         return true;
     }
