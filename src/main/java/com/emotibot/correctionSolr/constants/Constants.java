@@ -57,4 +57,14 @@ public class Constants
     public static final float DISTANCE_SYN_SCORE = 0.5f;
     
     public static final float SCORE_THRESHOLD_DIFF_CHOOSE = 0.05f;
+    
+    
+    //command
+    public static final String COMMAND_FILE_PATH_KEY = "COMMAND_FILE_PATH";
+    public static final int ERROR_COUNT_2_THRESHOLD = 2;
+    public static final int ERROR_COUNT_3_THRESHOLD = 2;
+    public static final int ERROR_COUNT_2_LEN_THRESHOLD = 4;
+    public static final int COMMOND_THREAD_NUM = 5;
+    
+    public static final String CORRECTION_COMMAND_SENTENCE_KEY = "CORRECTION_COMMAND_SENTENCE";
 }

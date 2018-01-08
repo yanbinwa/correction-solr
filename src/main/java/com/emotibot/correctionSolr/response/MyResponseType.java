@@ -4,5 +4,5 @@ import com.emotibot.middleware.response.ResponseType;
 
 public enum MyResponseType implements ResponseType
 {
-    CORRECTION
+    CORRECTION, CORRECTION_COMMAND
 }
