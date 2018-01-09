@@ -2,8 +2,11 @@ package com.emotibot.correctionSolr.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.emotibot.correction.element.SentenceElement;
 import com.emotibot.correction.utils.PinyinUtils;
@@ -26,6 +29,7 @@ public class CommandUtils
 {
     private static Map<String, SentenceElement> commandMap = new HashMap<String, SentenceElement>();
     private static Map<Integer, List<String>> lengthToCommandsMap = new HashMap<Integer, List<String>>();
+    public static ReentrantLock lock = new ReentrantLock();
     
     static
     {
@@ -38,6 +42,35 @@ public class CommandUtils
                 ConfigManager.INSTANCE.getPropertyString(Constants.COMMAND_FILE_PATH_KEY));
         
         updateSynonymCommand(commands);
+    }
+    
+    public static void loadSynonymCommandFromConsul(String[] lines)
+    {
+        lock.lock();
+        try
+        {
+            List<String> commandsTmp = new ArrayList<String>();
+            for (String line : lines)
+            {
+                String[] elements = line.trim().split("\t");
+                if (elements.length < 2)
+                {
+                    continue;
+                }
+
+                String levelInfo = elements[0];
+                if (MyConstants.level_infos.contains(levelInfo))
+                {
+                    String word = elements[1];
+                    commandsTmp.add(word.trim());
+                }
+            }
+            updateSynonymCommand(commandsTmp);
+        }
+        finally
+        {
+            lock.unlock();
+        }
     }
     
     public static void updateSynonymCommand(List<String> commands)
@@ -284,5 +317,19 @@ public class CommandUtils
             return false;
         }
         return true;
+    }
+    
+    static class MyConstants
+    {
+        private static String COMMAND_INFO = "专有词库>长虹>其他>指令";
+        private static String[] LEVEL_INFOS = {COMMAND_INFO};
+        public static Set<String> level_infos = new HashSet<String>();
+        static
+        {
+            for (String level_info : LEVEL_INFOS)
+            {
+                level_infos.add(level_info);
+            }
+        }
     }
 }

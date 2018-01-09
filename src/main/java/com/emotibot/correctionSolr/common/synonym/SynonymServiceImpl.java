@@ -13,6 +13,7 @@ import com.emotibot.configclient.ConfigResponseCallback;
 import com.emotibot.configclient.ConsulConfigClient;
 import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.utils.Base64CoderUtils;
+import com.emotibot.correctionSolr.utils.CommandUtils;
 import com.emotibot.correctionSolr.utils.ConsoleUtils;
 import com.emotibot.correctionSolr.utils.HttpUtils;
 import com.emotibot.correctionSolr.utils.MD5Utils;
@@ -206,6 +207,7 @@ public class SynonymServiceImpl implements SynonymService
         }
         SolrUtils.updateSynonymFile(lines);
         SolrUtils.updateSolrData(lines);
+        CommandUtils.loadSynonymCommandFromConsul(lines);
         this.localMD5 = remoteMD5;
         return true;
     }

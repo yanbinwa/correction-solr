@@ -1,6 +1,8 @@
 SOLR_URL=http://172.17.0.1:8081/solr/correction
 
+ORIGIN_FILE_PATH=/usr/src/correction-solr/file/correction.txt
 COMMON_SENTENCE_FILE_PATH=/usr/src/correction-solr/file/commonSentence.txt
+COMMAND_FILE_PATH=/usr/src/correction-solr/file/command.txt
 
 TOMCAT_PORT=9100
 TOMCAT_MAX_CONNECTION=100

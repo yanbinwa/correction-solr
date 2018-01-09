@@ -18,14 +18,14 @@ public class SynonymComponent implements ApplicationListener<ApplicationReadyEve
     @Override
     public int getExitCode()
     {
-        //synonymService.stop();
+        synonymService.stop();
         return 0;
     }
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent arg0)
     {
-        //synonymService.start();
+        synonymService.start();
     }
     
 }
