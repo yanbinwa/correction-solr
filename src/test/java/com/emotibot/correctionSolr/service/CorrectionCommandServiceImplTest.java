@@ -21,7 +21,7 @@ public class CorrectionCommandServiceImplTest
 
     public static final String correctionFile = 
             "/Users/emotibot/Documents/workspace/other/correction-solr/file/指令纠错测试.csv";
-    public static final String service_url = "http://localhost:9100/correction/getCorrectionCommand?text=";
+    public static final String service_url = "http://172.16.101.61:9100/correction/getCorrectionCommand?text=";
     
     @Test
     public void test()
