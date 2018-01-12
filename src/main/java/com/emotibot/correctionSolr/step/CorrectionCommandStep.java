@@ -67,6 +67,8 @@ public class CorrectionCommandStep extends AbstractStep
             count ++;
         }
         SentenceElement targetElement = new SentenceElement(sentence);
+        targetElement.addCharacterWithPinyin();
+        //需要进行调整，将字母的拼音也写入
         for (int i = 0; i < threadNum; i ++)
         {
             CorrectionCommandTask task = new CorrectionCommandTask(backets.get(i), targetElement);

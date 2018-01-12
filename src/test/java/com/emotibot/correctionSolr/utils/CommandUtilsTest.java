@@ -8,14 +8,16 @@ import com.emotibot.correctionSolr.element.CommandCompareElement;
 public class CommandUtilsTest
 {
 
-    String target = "乐视还求购物";
-    String command = "阅视环球购物";
+    String target = "打开ACNTV";
+    String command = "打开ICNTV";
     
     @Test
     public void test()
     {
         SentenceElement targetElement = new SentenceElement(target);
         SentenceElement commandElement = new SentenceElement(command);
+        targetElement.addCharacterWithPinyin();
+        commandElement.addCharacterWithPinyin();
         CommandCompareElement result = CommandUtils.getCommandCompareElement(targetElement, commandElement);
         System.out.println(result);
     }

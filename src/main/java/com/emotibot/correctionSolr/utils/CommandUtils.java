@@ -80,6 +80,7 @@ public class CommandUtils
         for (String command : commands)
         {
             SentenceElement element = new SentenceElement(command);
+            element.addCharacterWithPinyin();
             if (element != null && !commandMapTmp.containsKey(command))
             {
                 commandMapTmp.put(command, element);
@@ -146,7 +147,7 @@ public class CommandUtils
             int ret = compareCommandElement(targetElement, commandElement);
             
             //如果认为一致
-            if (ret <= 2)
+            if (ret <= 1 || (ret == 2 && !isAllLetters(targetElement.getSentence()) && !isAllLetters(commandElement.getSentence())))
             {
                 targetIndex ++;
                 commandIndex ++;
@@ -199,7 +200,7 @@ public class CommandUtils
                 commandIndex ++;
                 continue;
             }
-            else if (isAllLetters(commandElement.getSentence()) && isAllLetters(commandElement.getSentence())
+            else if (isAllLetters(targetElement.getSentence()) && isAllLetters(commandElement.getSentence())
                     && targetIndex < targetLen - 1 && commandIndex < commandLen - 1
                     && compareCommandElement(targetSingleSentenceElements.get(targetIndex + 1), commandSingleSentenceElements.get(commandIndex + 1)) <= 2)
             {
@@ -253,7 +254,7 @@ public class CommandUtils
         
         while(commandIndex < commandLen)
         {
-            SentenceElement commandElement = targetSingleSentenceElements.get(commandIndex);
+            SentenceElement commandElement = commandSingleSentenceElements.get(commandIndex);
             if (isAllLetters(commandElement.getSentence()))
             {
                 errorCount3 ++;
