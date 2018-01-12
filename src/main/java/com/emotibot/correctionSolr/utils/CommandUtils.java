@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.Logger;
+
 import com.emotibot.correction.element.SentenceElement;
+import com.emotibot.correction.utils.EditDistanceUtils;
 import com.emotibot.correction.utils.PinyinUtils;
 import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.element.CommandCompareElement;
@@ -22,18 +25,22 @@ import com.emotibot.middleware.utils.FileUtils;
  * 
  * 可以多线程比对
  * 
+ * 创建拼音到主词的映射，去掉前后鼻音和平翘舌音，这里是String -> List，如果有list需要在后台报错
+ * 
  * @author emotibot
  *
  */
 public class CommandUtils
 {
+    private static Logger logger = Logger.getLogger(CommandUtils.class);
     private static Map<String, SentenceElement> commandMap = new HashMap<String, SentenceElement>();
     private static Map<Integer, List<String>> lengthToCommandsMap = new HashMap<Integer, List<String>>();
-    public static ReentrantLock lock = new ReentrantLock();
+    private static ReentrantLock lock = new ReentrantLock();
+    private static Map<String, Set<String>> pinyinToCommandsMap = new HashMap<String, Set<String>>();
     
     static
     {
-        loadSynonymCommandFromFile();
+        //loadSynonymCommandFromFile();
     }
     
     public static void loadSynonymCommandFromFile()
@@ -61,8 +68,7 @@ public class CommandUtils
                 String levelInfo = elements[0];
                 if (MyConstants.level_infos.contains(levelInfo))
                 {
-                    String word = elements[1];
-                    commandsTmp.add(word.trim());
+                    commandsTmp.add(line);
                 }
             }
             updateSynonymCommand(commandsTmp);
@@ -73,12 +79,21 @@ public class CommandUtils
         }
     }
     
-    public static void updateSynonymCommand(List<String> commands)
+    /**
+     * 读取的是专有名词>长虹>其他>指令 语音关机 李音关机
+     * 
+     * @param commands
+     */
+    public static void updateSynonymCommand(List<String> lines)
     {
         Map<String, SentenceElement> commandMapTmp = new HashMap<String, SentenceElement>();
         Map<Integer, List<String>> lengthToCommandsMapTmp = new HashMap<Integer, List<String>>();
-        for (String command : commands)
+        Map<String, Set<String>> pinyinToCommandsMapTmp = new HashMap<String, Set<String>>();
+        for (String line : lines)
         {
+            String[] elements = line.trim().split("\t");
+            //提取标准词
+            String command = elements[1];
             SentenceElement element = new SentenceElement(command);
             element.addCharacterWithPinyin();
             if (element != null && !commandMapTmp.containsKey(command))
@@ -93,9 +108,27 @@ public class CommandUtils
                 }
                 lengthToCommandsList.add(command);
             }
+            
+            //构造同义词（包含标准词）的拼音到标准词的映射
+            for (int i = 1; i < elements.length; i ++)
+            {
+                SentenceElement likelyElements = new SentenceElement(elements[i]);
+                likelyElements.addCharacterWithPinyin();
+                likelyElements.clearNasalsAndPingqiao();
+                String pinyin = likelyElements.getPinyinEle().getPinyin();
+                Set<String> commandSet = pinyinToCommandsMapTmp.get(pinyin);
+                if (commandSet == null)
+                {
+                    commandSet = new HashSet<String>();
+                    pinyinToCommandsMapTmp.put(pinyin, commandSet);
+                }
+                commandSet.add(command);
+            }
         }
         commandMap = commandMapTmp;
         lengthToCommandsMap = lengthToCommandsMapTmp;
+        pinyinToCommandsMap = pinyinToCommandsMapTmp;
+        checkPinyinToCommandsMap();
     }
     
     public static SentenceElement getSentenceElement(String sentence)
@@ -318,6 +351,51 @@ public class CommandUtils
             return false;
         }
         return true;
+    }
+    
+    private static void checkPinyinToCommandsMap()
+    {
+        for(Map.Entry<String, Set<String>> entry : pinyinToCommandsMap.entrySet())
+        {
+            if (entry.getValue().size() > 1)
+            {
+                logger.error("相同同义词发音指向不同的标准指令: " + entry.getKey() + ": " + entry.getValue());
+            }
+        }
+    }
+    
+    public static String getCommandsFromSynonym(String sentence)
+    {
+        SentenceElement sentenceElement = new SentenceElement(sentence);
+        sentenceElement.addCharacterWithPinyin();
+        sentenceElement.clearNasalsAndPingqiao();
+        Set<String> commandsSet = pinyinToCommandsMap.get(sentenceElement.getPinyinEle().getPinyin());
+        if (commandsSet == null || commandsSet.isEmpty())
+        {
+            return null;
+        }
+        double distance = Double.MAX_VALUE;
+        SentenceElement ret = null;
+        //需要计算编辑距离，求出最优结果
+        for (String command : commandsSet)
+        {
+            SentenceElement targetElement = commandMap.get(command);
+            if (sentenceElement == null)
+            {
+                continue;
+            }
+            double distanceTmp = EditDistanceUtils.getEditDistance(sentenceElement, targetElement);
+            if (distanceTmp < distance)
+            {
+                ret = targetElement;
+                distance = distanceTmp;
+            }
+        }
+        if (ret == null)
+        {
+            return null;
+        }
+        return ret.getSentence();
     }
     
     static class MyConstants

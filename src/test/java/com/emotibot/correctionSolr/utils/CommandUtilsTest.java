@@ -8,8 +8,8 @@ import com.emotibot.correctionSolr.element.CommandCompareElement;
 public class CommandUtilsTest
 {
 
-    String target = "你应关机";
-    String command = "女婴关机";
+    String target = "VGA";
+    String command = "危机a";
     
     @Test
     public void test()

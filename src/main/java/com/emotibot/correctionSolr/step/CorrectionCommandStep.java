@@ -40,6 +40,12 @@ public class CorrectionCommandStep extends AbstractStep
         {
             return;
         }
+        String command = CommandUtils.getCommandsFromSynonym(sentence);
+        if (!StringUtils.isEmpty(command))
+        {
+            setCorrectionCommand(context, command);
+            return;
+        }
         List<String> potentialCommands = CommandUtils.getPotentialCommands(sentence);
         if (potentialCommands.isEmpty())
         {
@@ -106,11 +112,16 @@ public class CorrectionCommandStep extends AbstractStep
         }
         Collections.sort(resultElements);
         System.out.println(resultElements);
-        JsonArray output = new JsonArray();
-        output.add(resultElements.get(0).getSentence());
-        context.setValue(Constants.CORRECTION_COMMAND_SENTENCE_KEY, output.toString());
+        setCorrectionCommand(context, resultElements.get(0).getSentence());
         long end = System.currentTimeMillis();
         System.out.println("cost: [" + (end - start) + "]ms");
+    }
+    
+    private void setCorrectionCommand(Context context, String command)
+    {
+        JsonArray output = new JsonArray();
+        output.add(command);
+        context.setValue(Constants.CORRECTION_COMMAND_SENTENCE_KEY, output.toString());
     }
 
 }
