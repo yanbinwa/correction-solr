@@ -67,4 +67,7 @@ public class Constants
     public static final int COMMOND_THREAD_NUM = 5;
     
     public static final String CORRECTION_COMMAND_SENTENCE_KEY = "CORRECTION_COMMAND_SENTENCE";
+    
+    public static final String OLD_NAME = "old_text";
+    public static final String LIKELY_NAME_ARR = "likely_names";
 }

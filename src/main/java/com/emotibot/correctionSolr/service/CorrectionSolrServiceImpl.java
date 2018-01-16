@@ -12,8 +12,10 @@ import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.step.CorrectionStep;
 import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.middleware.context.Context;
+import com.emotibot.middleware.utils.JsonUtils;
 import com.emotibot.middleware.utils.StringUtils;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * 将text生成不同的QueryElement，并行调用得到结果
@@ -58,12 +60,22 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
     
     private String getCorrection(Context context)
     {
-        String ret = (String) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
-        if (StringUtils.isEmpty(ret))
+        String correctionNameArrStr = (String) context.getValue(Constants.CORRECTION_SENTENCE_KEY);
+        if (StringUtils.isEmpty(correctionNameArrStr))
         {
-            ret = new JsonArray().toString();
+            correctionNameArrStr = new JsonArray().toString();
         }
-        return ret;
+        String sentence = (String) context.getValue(Constants.SENTENCE_KEY);
+        String oldName = CorrectionUtils.getLikelyCorrection2(sentence);
+        if (StringUtils.isEmpty(oldName))
+        {
+            oldName = "";
+        }
+        JsonArray correctionNameArr = (JsonArray) JsonUtils.getObject(correctionNameArrStr, JsonArray.class);
+        JsonObject retObj = new JsonObject();
+        retObj.addProperty(Constants.OLD_NAME, oldName);
+        retObj.add(Constants.LIKELY_NAME_ARR, correctionNameArr);
+        return retObj.toString();
     }
 
 }
