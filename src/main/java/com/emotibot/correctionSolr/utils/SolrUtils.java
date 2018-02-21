@@ -48,7 +48,7 @@ public class SolrUtils
     static
     {
         buildSolrClient();
-        deleteAllData();
+        //deleteAllData();
     }
     
     private static void buildSolrClient()

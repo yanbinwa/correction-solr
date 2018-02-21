@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.log4j.Logger;
-import org.springframework.util.StringUtils;
 
 import com.emotibot.correction.element.SentenceElement;
 import com.emotibot.correction.utils.EditDistanceUtils;
@@ -23,9 +22,11 @@ import com.emotibot.correctionSolr.task.CorrectionTask;
 import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.correctionSolr.utils.QueryElementUtils;
 import com.emotibot.correctionSolr.utils.SolrUtils;
+import com.emotibot.correctionSolr.utils.TemplateUtils;
 import com.emotibot.middleware.context.Context;
 import com.emotibot.middleware.response.Response;
 import com.emotibot.middleware.step.AbstractStep;
+import com.emotibot.middleware.utils.StringUtils;
 import com.google.gson.JsonArray;
 
 /**
@@ -52,11 +53,18 @@ public class CorrectionStep extends AbstractStep
     public void beforeRun(Context context)
     {
         String sentence = (String) context.getValue(Constants.SENTENCE_KEY);
-        sentence = CorrectionUtils.getLikelyCorrection2(sentence);
+        //sentence = CorrectionUtils.getLikelyCorrection2(sentence);
+        sentence = getLikelyCorrection3(sentence);
         if (StringUtils.isEmpty(sentence))
         {
             return;
         }
+        /* --- test --- 
+        JsonArray output = new JsonArray();
+        output.add(sentence);
+        context.setValue(Constants.CORRECTION_SENTENCE_KEY, output.toString());
+        return;
+        --- test --- */
         context.setValue(Constants.SENTENCE_LIKELY_KEY, sentence);
         System.out.println(sentence);
         List<QueryElement> queryElementList = new ArrayList<QueryElement>();
@@ -339,4 +347,43 @@ public class CorrectionStep extends AbstractStep
         });
         return result;
     }
+    
+    /**
+     * 通过机器学习得到template，通过template得到可能片名，该方法需要配合
+     * templatefetch服务一起进行，需要配置相关的url
+     * 
+     * @param sentence
+     * @return
+     */
+    private String getLikelyCorrection3(String sentence)
+    {
+        Map<String, List<String>> specicalTagMap = new HashMap<String, List<String>>();
+        String sentenceTmp = TemplateUtils.adjustSentence(sentence, specicalTagMap);
+        List<String> templates = TemplateUtils.fetchTemplates(sentenceTmp);
+        double diff = Double.MAX_VALUE;
+        String chooseTemplate = null;
+        for (String template : templates)
+        {
+            if (!TemplateUtils.isValidTemplate(template, specicalTagMap))
+            {
+                continue;
+            }
+            template = TemplateUtils.adjustTemplate(template, specicalTagMap);
+            double diffTmp = TemplateUtils.getDistanceOfSentenceAndTemplate(sentence, template);
+            if (diffTmp < diff)
+            {
+                diff = diffTmp;
+                chooseTemplate = template;
+            }
+        }
+        if (StringUtils.isEmpty(chooseTemplate))
+        {
+            return sentence;
+        }
+        logger.info("chooseTemplate is: " + chooseTemplate);
+        int index = chooseTemplate.indexOf(TemplateUtils.TEMPLATE_TAG);
+        String newSentence = sentence.substring(index, sentence.length() - (chooseTemplate.length() - (index + TemplateUtils.TEMPLATE_TAG.length())));
+        return newSentence;
+    }
+
 }

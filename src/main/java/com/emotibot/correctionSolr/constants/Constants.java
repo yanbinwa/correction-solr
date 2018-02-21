@@ -70,4 +70,11 @@ public class Constants
     
     public static final String OLD_NAME = "old_text";
     public static final String LIKELY_NAME_ARR = "likely_names";
+    
+    //template
+    public static final String FETCH_TEMPLATE_URL_KEY = "FETCH_TEMPLATE_URL";
+    public static final double TEMPLATE_DIFF_RATE = 0.7;
+    public static final double TEMPLATE_RATE_1_THRESHOLD = 0.005;
+    public static final double TEMPLATE_RATE_2_THRESHOLD = -0.5;
+    public static final String TEMPLATE_TAG_KEY = "TEMPLATE_TAG";
 }

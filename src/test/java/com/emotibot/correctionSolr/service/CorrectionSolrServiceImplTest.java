@@ -31,7 +31,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class CorrectionSolrServiceImplTest
 {
-    public static final String correctionFile = "/Users/emotibot/Documents/workspace/other/correction-solr/file/长虹纠错.csv";
+    public static final String correctionFile = "/Users/emotibot/Documents/workspace/other/correction-solr/file/自动纠错5.csv";
     public static final String service_url = "http://172.16.101.61:9100/correction/postCorrectionName";
     public static final String service_url1 = "http://172.16.101.61:15901/correction/v1/";
     
@@ -49,7 +49,7 @@ public class CorrectionSolrServiceImplTest
     public void test()
     {
         long startTime = System.currentTimeMillis();
-        test1();
+        test4();
         long endTime = System.currentTimeMillis();
         System.out.println("用时：[" + (endTime - startTime) + "ms]");
         System.out.println("totalCount: " + totalCount + "; errorCount: " + errorTotalCount + "; emptyCount: " + emptyCount);
@@ -248,12 +248,109 @@ public class CorrectionSolrServiceImplTest
         }        
     }
     
+    /**
+     * 对用户日志进行纠错（多线程处理）
+     * 
+     * 如果得到片名，并且片名不是包含在用户的语句中的，进行标记
+     * 
+     * 将结果输出到文件中
+     */
+    @SuppressWarnings("unused")
+    private void test4()
+    {
+        File file = new File(correctionFile);
+        FileReader fReader = null;
+        CSVReader csvReader = null; 
+        try
+        {
+            Set<String> testSentence = new HashSet<String>();
+            fReader = new FileReader(file);
+            csvReader = new CSVReader(fReader);
+            List<String[]> list = csvReader.readAll();
+            List<List<String>> rets = new ArrayList<List<String>>();
+            for (String[] ss : list)
+            {
+                String correctSentence = ss[0].trim();
+                String errorSentence = ss[1].trim();
+                if (StringUtils.isEmpty(correctSentence) || StringUtils.isEmpty(errorSentence))
+                {
+                    continue;
+                }
+                totalCount ++;
+                HttpRequest request = new HttpRequest(service_url, errorSentence, HttpRequestType.POST);
+                HttpResponse response = HttpUtils.call(request, 10000);
+                String result = response.getResponse();
+                List<String> ret = new ArrayList<String>();
+                ret.add(errorSentence);
+                ret.add(correctSentence);
+                String retName = getResult(result);
+                if (StringUtils.isEmpty(retName))
+                {
+                    ret.add("");
+                    ret.add("False");
+                    errorTotalCount ++;
+                    emptyCount ++;
+                }
+                else if (!retName.equals(correctSentence))
+                {
+                    ret.add(retName);
+                    ret.add("False");
+                    errorTotalCount ++;
+                }
+                else
+                {
+                    ret.add(retName);
+                    ret.add("True");
+                }
+                rets.add(ret);
+            }
+            writeXls(rets, outputFile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                csvReader.close();
+                fReader.close();
+            } 
+            catch (IOException e)
+            {
+                
+            }
+        }        
+    }
+    
+    private String getResult(String result)
+    {
+        JsonObject obj = (JsonObject) JsonUtils.getObject(result, JsonObject.class);
+        if (obj == null || !obj.has("likely_names"))
+        {
+            return null;
+        }
+        JsonArray array = obj.get("likely_names").getAsJsonArray();
+        if (array.size() == 0)
+        {
+            return null;
+        }
+        return array.get(0).getAsString();
+    }
+    
     private boolean isCorrected(String result, String correctSentence)
     {
-        result = result.replace("[", "");
-        result = result.replace("]", "");
-        result = result.replace("\"", "");
-        String[] names = result.split(",");
+        JsonObject obj = (JsonObject) JsonUtils.getObject(result, JsonObject.class);
+        if (obj == null || !obj.has("likely_names"))
+        {
+            return false;
+        }
+        String resultStr = obj.get("likely_names").toString();
+        resultStr = resultStr.replace("[", "");
+        resultStr = resultStr.replace("]", "");
+        resultStr = resultStr.replace("\"", "");
+        String[] names = resultStr.split(",");
         for (String name : names)
         {
             if (name.trim().equals(correctSentence))
@@ -266,10 +363,16 @@ public class CorrectionSolrServiceImplTest
     
     private boolean isEmpty(String result)
     {
-        result = result.replace("[", "");
-        result = result.replace("]", "");
-        result = result.replace("\"", "");
-        return "".equals(result.trim());
+        JsonObject obj = (JsonObject) JsonUtils.getObject(result, JsonObject.class);
+        if (obj == null || !obj.has("likely_names"))
+        {
+            return false;
+        }
+        String resultStr = obj.get("likely_names").toString();
+        resultStr = resultStr.replace("[", "");
+        resultStr = resultStr.replace("]", "");
+        resultStr = resultStr.replace("\"", "");
+        return "".equals(resultStr.trim());
     }
     
     private boolean writeXls(List<List<String>> cellLists, String fileName)
