@@ -6,7 +6,7 @@
 REPO=docker-reg.emotibot.com.cn:55688
 # The name of the container, should use the name of the repo is possible
 # <EDIT_ME>
-CONTAINER=correction-solr
+CONTAINER=correction-standard
 # </EDIT_ME>
 
 echo "DOCKER_IMAGE: $DOCKER_IMAGE"

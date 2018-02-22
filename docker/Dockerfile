@@ -19,7 +19,7 @@ COPY docker ./docker
 COPY file ./file
 
 # Download main jar
-RUN wget "http://docker-reg.emotibot.com.cn:8081/artifactory/libs-snapshot-local/com/emotibot/correction-solr/${BUNDLE_VER}/correction-solr-${BUNDLE_VER}.jar" -P /usr/src/correction-solr
+RUN wget "http://docker-reg.emotibot.com.cn:8081/artifactory/libs-snapshot-local/com/emotibot/correction-standard/${BUNDLE_VER}/correction-standard-${BUNDLE_VER}.jar" -P /usr/src/correction-solr
 
 # defaults
 ENTRYPOINT ["bin/run.sh"]

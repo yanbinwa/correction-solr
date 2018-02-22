@@ -18,4 +18,4 @@ java -Dfile.encoding=UTF8 \
      -XX:MaxMetaspaceSize=6g \
      -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 \
      -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark \
-     -jar correction-solr-1.0-SNAPSHOT.jar
+     -jar correction-standard-1.0-SNAPSHOT.jar
