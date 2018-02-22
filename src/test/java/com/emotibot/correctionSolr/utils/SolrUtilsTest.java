@@ -25,6 +25,8 @@ public class SolrUtilsTest
     
     public static final String[] VIDEO_NAMES = {"代孕", "母亲", "我的母亲", "代孕妈妈"};
     
+    public static final String APPID = "5a200ce8e6ec3a6506030e54ac3b970e";
+    
     @Test
     public void test()
     {
@@ -106,7 +108,7 @@ public class SolrUtilsTest
     @SuppressWarnings("unused")
     private void test3()
     {
-        List<String> ret = SolrUtils.querySolrData(WORD_DATABASE, VIDEO_NAME_SEGEMENT);
+        List<String> ret = SolrUtils.querySolrData(APPID, WORD_DATABASE, VIDEO_NAME_SEGEMENT);
         System.out.println(ret);
     }
     
@@ -119,7 +121,7 @@ public class SolrUtilsTest
         int count = 0;
         for (String str : VIDEO_NAMES)
         {
-            CorrectionElement element = CorrectionElementUtils.getCorrectionElement(str, String.valueOf(count), DatabaseType.WORD_SYN_DATABASE);
+            CorrectionElement element = CorrectionElementUtils.getCorrectionElement(APPID, str, String.valueOf(count), DatabaseType.WORD_SYN_DATABASE);
             list.add(element);
             count ++;
         }
@@ -130,7 +132,7 @@ public class SolrUtilsTest
     private void test5()
     {
         String text = "可不可以把代孕母亲放给我看";
-        QueryElement queryEle = QueryElementUtils.getQueryElement(text, DatabaseType.WORD_SYN_DATABASE);
+        QueryElement queryEle = QueryElementUtils.getQueryElement(APPID, text, DatabaseType.WORD_SYN_DATABASE);
         List<ResultElement> retEles = SolrUtils.querySolrData(queryEle, "sentence_original");
         System.out.println(retEles);
     }

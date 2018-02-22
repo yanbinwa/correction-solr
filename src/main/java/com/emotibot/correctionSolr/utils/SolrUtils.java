@@ -2,12 +2,13 @@ package com.emotibot.correctionSolr.utils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,7 +44,7 @@ public class SolrUtils
     public static DatabaseType[] databaseType = {DatabaseType.SINGLE_WORD_DATABASE, DatabaseType.WORD_DATABASE, DatabaseType.WORD_SYN_DATABASE, DatabaseType.PINYING_WORD_DATABASE, DatabaseType.PINYING2_WORD_DATABASE};
         
     public static ReentrantLock lock = new ReentrantLock();
-    public static Set<String> movieNameSet = new HashSet<String>();
+    public static Map<String, Set<String>> movieNamesMap = new HashMap<String, Set<String>>();
     
     static
     {
@@ -77,6 +78,23 @@ public class SolrUtils
         }
     }
     
+    public static void deleteAllData(String appid)
+    {
+        try
+        {
+            solrClient.deleteByQuery("appid:" + appid);
+            solrClient.commit();
+        } 
+        catch (SolrServerException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
     public static void deleteAllData()
     {
         try
@@ -94,12 +112,15 @@ public class SolrUtils
         }
     }
     
-    public static List<String> querySolrData(String database, String query)
+    public static List<String> querySolrData(String appid, String database, String query)
     {
         List<String> ret = new ArrayList<String>();
         SolrQuery params = new SolrQuery();
         params.set("q", query);
-        params.set("fq", "database:" + database);
+        SolrQuery filterQuery = new SolrQuery();
+        filterQuery.add("database:" + database);
+        filterQuery.add("appid:" + appid);
+        params.add(filterQuery);
         try
         {
             QueryResponse rsp = solrClient.query(params);
@@ -125,13 +146,16 @@ public class SolrUtils
         params.set("q", query.getQ());
         params.set("start", query.getStart());
         params.set("rows", query.getRows());
+        SolrQuery filterQuery = new SolrQuery();
+        params.add(filterQuery);
+        filterQuery.add("appid:" + query.getAppid());
         if (!StringUtils.isEmpty(query.getFl()))
         {
             params.set("fl", query.getFl());
         }
         if (!StringUtils.isEmpty(query.getFq()))
         {
-            params.set("fq", query.getFq());
+            filterQuery.add(query.getFq());
         }
         if (!StringUtils.isEmpty(query.getDefType()))
         {
@@ -161,7 +185,10 @@ public class SolrUtils
         }
     }
     
-    public static void updateSolrData(String[] lines)
+    /**
+     * 按照appid来存数据，这里直接写入到solr，不需要通过levelInfo
+     */
+    public static void updateSolrData(String appid, String[] lines)
     {
         lock.lock();
         try
@@ -169,19 +196,18 @@ public class SolrUtils
             Set<String> movieNameSetTmp = new HashSet<String>();
             for (String line : lines)
             {
-                String[] elements = line.trim().split("\t");
-                if (elements.length < 2)
+                if (!StringUtils.isEmpty(line))
                 {
-                    continue;
-                }
-
-                String levelInfo = elements[0];
-                if (MyConstants.level_infos.contains(levelInfo))
-                {
-                    String word = elements[1];
-                    movieNameSetTmp.add(word.trim());
+                    movieNameSetTmp.add(line.trim());
                 }
             }
+            
+            Set<String> movieNameSet = movieNamesMap.get(appid);
+            if (movieNameSet == null)
+            {
+                movieNameSet = new HashSet<String>();
+            }
+            
             Set<String> addSet = new HashSet<String>();
             Set<String> deleteSet = new HashSet<String>();
             
@@ -209,59 +235,17 @@ public class SolrUtils
             logger.info("add set size is: " + addSet.size() + "; delete set is: " + deleteSet);
             if (deleteSet.size() == 0)
             {
-                loadSynonymToSolr(addSet, false);
+                loadSynonymToSolr(appid, addSet, false);
             }
             else
             {
-                loadSynonymToSolr(movieNameSetTmp, true);
+                loadSynonymToSolr(appid, movieNameSetTmp, true);
             }
-            movieNameSet.clear();
-            movieNameSet.addAll(movieNameSetTmp);
+            movieNamesMap.put(appid, movieNameSetTmp);
         }
         finally
         {
             lock.unlock();
-        }
-    }
-    
-    public static void updateSynonymFile(String[] lines)
-    {
-        String originalFile = ConfigManager.INSTANCE.getPropertyString(com.emotibot.correction.constants.Constants.ORIGIN_FILE_PATH) + ".tmp";
-        FileWriter fw = null;
-        try
-        {
-            fw = new FileWriter(originalFile);
-            for (String line : lines)
-            {
-                String[] elements = line.trim().split("\t");
-                if (elements.length < 2)
-                {
-                    continue;
-                }
-
-                String levelInfo = elements[0];
-                if (MyConstants.level_infos.contains(levelInfo))
-                {
-                    String word = elements[1];
-                    fw.write(word + "\r\n");
-                }
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return;
-        }
-        finally
-        {
-            try
-            {
-                fw.close();
-            } 
-            catch (IOException e)
-            {
-                
-            }
         }
     }
     
@@ -280,7 +264,7 @@ public class SolrUtils
             }
             if (synonymSet.size() > 0)
             {
-                loadSynonymToSolr(synonymSet, true);
+                loadSynonymToSolr("5a200ce8e6ec3a6506030e54ac3b970e", synonymSet, true);
             }
             logger.info("Solr update successful");
         }
@@ -304,11 +288,11 @@ public class SolrUtils
         }
     }
     
-    public static void loadSynonymToSolr(Set<String> synonymSet, boolean tag)
+    public static void loadSynonymToSolr(String appid, Set<String> synonymSet, boolean tag)
     {
         if (tag)
         {
-            deleteAllData();
+            deleteAllData(appid);
         }
         List<CorrectionElement> solrDataList = new ArrayList<CorrectionElement>();
         int count = 0;
@@ -316,7 +300,7 @@ public class SolrUtils
         {
             for (DatabaseType type : databaseType)
             {
-                CorrectionElement element = CorrectionElementUtils.getCorrectionElement(synonym, String.valueOf(count), type);
+                CorrectionElement element = CorrectionElementUtils.getCorrectionElement(appid, synonym, String.valueOf(count), type);
                 if (element != null)
                 {
                     solrDataList.add(element);
@@ -330,21 +314,5 @@ public class SolrUtils
     public static void test()
     {
         
-    }
-    
-    static class MyConstants
-    {
-        private static String MOVIE_INFO = "专有词库>长虹>影视>电影";
-        //private static String TV_INFO = "专有词库>长虹>影视>电视剧";
-        private static String[] LEVEL_INFOS = {MOVIE_INFO};
-        //private static String[] LEVEL_INFOS = {MOVIE_INFO, TV_INFO};
-        public static Set<String> level_infos = new HashSet<String>();
-        static
-        {
-            for (String level_info : LEVEL_INFOS)
-            {
-                level_infos.add(level_info);
-            }
-        }
     }
 }

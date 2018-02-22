@@ -1,15 +1,14 @@
-SOLR_URL=http://172.17.0.1:8081/solr/correction
+SOLR_URL=http://172.17.0.1:8081/solr/correction_standard
 
 ORIGIN_FILE_PATH=/usr/src/correction-solr/file/correction.txt
 COMMON_SENTENCE_FILE_PATH=/usr/src/correction-solr/file/commonSentence.txt
 COMMAND_FILE_PATH=/usr/src/correction-solr/file/command.txt
 
-TOMCAT_PORT=9100
+TOMCAT_PORT=9101
 TOMCAT_MAX_CONNECTION=100
 TOMCAT_MAX_THREAD=100
 TOMCAT_MAX_TIMEOUT=30000
 
 CONSUL_SERVICE_URL_KEY=http://172.17.0.1:8500/
-CONSUL_KEY_PREFIX_KEY=idc/cnlu
-RUN_ON_LOCAL_KEY=true
-APPID_KEY=5a200ce8e6ec3a6506030e54ac3b970e
+CONSUL_KEY_PREFIX_KEY=idc/correction
+RUN_ON_LOCAL_KEY=false

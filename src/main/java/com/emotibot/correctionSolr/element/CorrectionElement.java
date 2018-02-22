@@ -19,6 +19,9 @@ public class CorrectionElement
     @Field
     private String sentence_original;
     
+    @Field
+    private String appid;
+    
     public CorrectionElement()
     {
         
@@ -72,5 +75,15 @@ public class CorrectionElement
     public String getSentence_original()
     {
         return this.sentence_original;
+    }
+    
+    public void setAppid(String appid)
+    {
+        this.appid = appid;
+    }
+    
+    public String getAppid()
+    {
+        return this.appid;
     }
 }

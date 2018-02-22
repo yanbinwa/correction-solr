@@ -20,7 +20,6 @@ import com.emotibot.correctionSolr.element.ResultElement;
 import com.emotibot.correctionSolr.response.MyResponseType;
 import com.emotibot.correctionSolr.response.correction.CorrectionResponse;
 import com.emotibot.correctionSolr.task.CorrectionTask;
-import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.correctionSolr.utils.QueryElementUtils;
 import com.emotibot.correctionSolr.utils.SolrUtils;
 import com.emotibot.middleware.context.Context;
@@ -52,17 +51,16 @@ public class CorrectionStep extends AbstractStep
     public void beforeRun(Context context)
     {
         String sentence = (String) context.getValue(Constants.SENTENCE_KEY);
-        sentence = CorrectionUtils.getLikelyCorrection2(sentence);
-        if (StringUtils.isEmpty(sentence))
+        String appid = (String) context.getValue(Constants.APPID_KEY);
+        if (StringUtils.isEmpty(sentence) || StringUtils.isEmpty(appid))
         {
             return;
         }
         context.setValue(Constants.SENTENCE_LIKELY_KEY, sentence);
-        System.out.println(sentence);
         List<QueryElement> queryElementList = new ArrayList<QueryElement>();
         for (DatabaseType type : SolrUtils.databaseType)
         {
-            QueryElement queryElement = QueryElementUtils.getQueryElement(sentence, type);
+            QueryElement queryElement = QueryElementUtils.getQueryElement(appid, sentence, type);
             if (queryElement != null)
             {
                 queryElementList.add(queryElement);

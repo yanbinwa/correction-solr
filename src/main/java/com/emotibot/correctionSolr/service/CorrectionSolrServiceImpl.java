@@ -34,20 +34,14 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
     private CorrectionStep correctionStep = new CorrectionStep(executorService);
     
     @Override
-    public String getCorrectionName(String text)
+    public String getCorrectionName(String appid, String text)
     {
         Context context = new Context();
         context.setValue(Constants.SENTENCE_KEY, text.trim());
+        context.setValue(Constants.APPID_KEY, text.trim());
         correctionSentence(context);
         String result = getCorrection(context);
         return result;
-    }
-    
-    @Override
-    public String getLikelyName(String text)
-    {
-        text = CorrectionUtils.getLikelyCorrection(text);
-        return text;
     }
 
     private void correctionSentence(Context context)
@@ -77,5 +71,4 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
         retObj.add(Constants.LIKELY_NAME_ARR, correctionNameArr);
         return retObj.toString();
     }
-
 }

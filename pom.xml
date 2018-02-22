@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.emotibot</groupId>
-  <artifactId>correction-solr</artifactId>
+  <artifactId>correction-standard</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>correction-solr</name>
+  <name>correction-standard</name>
   <url>http://maven.apache.org</url>
   <distributionManagement>
     <snapshotRepository>
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>com.emotibot</groupId>
       <artifactId>middleware</artifactId>
-      <version>0.1.9-SNAPSHOT</version>
+      <version>0.1.10-SNAPSHOT</version>
 	</dependency>
     <dependency>
       <groupId>log4j</groupId>

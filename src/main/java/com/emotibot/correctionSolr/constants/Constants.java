@@ -19,9 +19,7 @@ public class Constants
     public static final int CONSUL_WAIT_TIME = 2;
     
     public static final String CONSUL_VALUE_JSON_KEY_URL = "url";
-    public static final String CONSUL_VALUE_JSON_KEY_MD5 = "md5";
-    public static final String CONSUL_VALUE_JSON_KEY_SYNONYM_URL = "synonym-url";
-    public static final String CONSUL_VALUE_JSON_KEY_SYNONYM_MD5 = "synonym-md5";
+    public static final String CONSUL_VALUE_JSON_KEY_VERSION = "version";
     public static final String LINE_SPLIT_REGEX = "\\r\\n|\\n|\\r";
     public static final int CONSUL_JOIN_TIME = 20;
     

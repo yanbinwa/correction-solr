@@ -8,12 +8,13 @@ import com.emotibot.correctionSolr.element.QueryElement;
 
 public class QueryElementUtils
 {
-    public static QueryElement getQueryElement(String text, DatabaseType type)
+    public static QueryElement getQueryElement(String appid, String text, DatabaseType type)
     {
         QueryElement queryElement = new QueryElement();
         queryElement.setFl("*,score");
         queryElement.setFq("database:" + type.name());
         queryElement.setDatabase(type);
+        queryElement.setAppid(appid);
         String q = null;
         switch(type)
         {

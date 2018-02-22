@@ -44,19 +44,25 @@ public class QueryElement
     @Expose
     private DatabaseType database;
     
+    @SerializedName("appid")
+    @Expose
+    private String appid;
+    
     public QueryElement()
     {
         
     }
     
-    public QueryElement(String q, String fq)
+    public QueryElement(String appid, String q, String fq)
     {
+        this.appid = appid;
         this.q = q;
         this.fq = fq;
     }
     
-    public QueryElement(String q, String fq, String fl, int start, int rows)
+    public QueryElement(String appid, String q, String fq, String fl, int start, int rows)
     {
+        this.appid = appid;
         this.q = q;
         this.fq = fq;
         this.start = start;
@@ -141,6 +147,16 @@ public class QueryElement
     public DatabaseType getDatabase()
     {
         return this.database;
+    }
+    
+    public void setAppid(String appid)
+    {
+        this.appid = appid;
+    }
+    
+    public String getAppid()
+    {
+        return this.appid;
     }
     
     @Override
