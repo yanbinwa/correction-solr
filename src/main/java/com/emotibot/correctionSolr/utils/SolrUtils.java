@@ -41,15 +41,34 @@ public class SolrUtils
     
     private static String solr_url = ConfigManager.INSTANCE.getPropertyString(Constants.SOLR_URL_KEY);
     private static HttpSolrClient solrClient = null; 
-    public static DatabaseType[] databaseType = {DatabaseType.SINGLE_WORD_DATABASE, DatabaseType.WORD_DATABASE, DatabaseType.WORD_SYN_DATABASE, DatabaseType.PINYING_WORD_DATABASE, DatabaseType.PINYING2_WORD_DATABASE};
-        
-    public static ReentrantLock lock = new ReentrantLock();
-    public static Map<String, Set<String>> movieNamesMap = new HashMap<String, Set<String>>();
+    public static List<DatabaseType> databaseType = null;
+            
+    private static ReentrantLock lock = new ReentrantLock();
+    private static Map<String, Set<String>> movieNamesMap = new HashMap<String, Set<String>>();
     
     static
     {
+        initDatabaseType();
         buildSolrClient();
         deleteAllData();
+    }
+    
+    private static void initDatabaseType()
+    {
+        databaseType = new ArrayList<DatabaseType>();
+        databaseType.add(DatabaseType.SINGLE_WORD_DATABASE);
+        databaseType.add(DatabaseType.WORD_DATABASE);
+        boolean enableHomonym = ConfigManager.INSTANCE.getPropertyBoolean(Constants.ENABLE_HOMONYM_CORRECTION_KEY);
+        if (enableHomonym)
+        {
+            databaseType.add(DatabaseType.PINYING_WORD_DATABASE);
+            databaseType.add(DatabaseType.PINYING2_WORD_DATABASE);
+        }
+        boolean enableSynonym = ConfigManager.INSTANCE.getPropertyBoolean(Constants.ENABLE_SYNONYM_CORRECTION_KEY);
+        if (enableSynonym)
+        {
+            databaseType.add(DatabaseType.WORD_SYN_DATABASE);
+        }
     }
     
     private static void buildSolrClient()

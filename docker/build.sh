@@ -2,7 +2,7 @@
 REPO=docker-reg.emotibot.com.cn:55688
 REPO=${REPO_JENKINS:-$REPO}
 
-CONTAINER=correction-solr
+CONTAINER=correction-standard
 CONTAINER=${CONTAINER_JENKINS:-$CONTAINER}
 
 TAG=$(git rev-parse --short HEAD)

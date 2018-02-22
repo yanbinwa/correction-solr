@@ -29,7 +29,6 @@ public class Constants
     public static final String TOMCAT_MAX_THREAD_KEY = "TOMCAT_MAX_THREAD";
     public static final String TOMCAT_CONNECTION_TIMEOUT_KEY = "TOMCAT_CONNECTION_TIMEOUT";
     
-    
     public static final String SENTENCE_KEY = "SENTENCE";
     public static final String CORRECTION_SENTENCE_KEY = "CORRECTION_SENTENCE";
     public static final String SENTENCE_LIKELY_KEY = "SENTENCE_LIKELY";
@@ -37,13 +36,15 @@ public class Constants
     public static final String SOLR_SENTENCE_FIELD = "sentence";
     public static final String SOLR_SENTENCE_SYN_FIELD = "sentence_syn";
     
+    public static final float SOLR_MAX_SCORE = 6f;
     public static final float SCORE_THRESHOLD_RATE_PROTENTIAL = 3 / 1.0f;
     public static final float SCORE_THRESHOLD_RATE_RECOMMEND = 2 / 1.0f;
     public static final float SCORE_THRESHOLD_PROTENTIAL = 2.0f;
-    public static final float SCORE_THRESHOLD_RECOMMEND = 1.8f;
-    public static final int RECOMMEND_NUM = 1;
+    public static final float SCORE_THRESHOLD_RECOMMEND_0 = 1.4f;
+    public static final float SCORE_THRESHOLD_RECOMMEND_1 = 1.8f;
+    public static final float SCORE_THRESHOLD_RECOMMEND_2 = 2.2f;
     public static final int POTENTIAL_NUM = 10;
-    public static final float SCORE_THRESHOLD_DIFF_PROTENTIAL = 0.3f;
+    public static final float SCORE_THRESHOLD_DIFF_PROTENTIAL = 0.5f;
     public static final float SCORE_THRESHOLD_DIFF_RECOMMEND = 0.3f;
     
     public static final float SYN_WORD_ADJUST_THRESHOLD = 4.0f;
@@ -56,15 +57,13 @@ public class Constants
     
     public static final float SCORE_THRESHOLD_DIFF_CHOOSE = 0.05f;
     
-    
-    //command
-    public static final String COMMAND_FILE_PATH_KEY = "COMMAND_FILE_PATH";
-    public static final int ERROR_COUNT_2_THRESHOLD = 2;
-    public static final int ERROR_COUNT_3_THRESHOLD = 2;
-    public static final int ERROR_COUNT_2_LEN_THRESHOLD = 4;
-    public static final int COMMOND_THREAD_NUM = 5;
-    
-    public static final String CORRECTION_COMMAND_SENTENCE_KEY = "CORRECTION_COMMAND_SENTENCE";
+    //correction参数
+    public static final String ENABLE_HOMONYM_CORRECTION_KEY = "ENABLE_HOMONYM_CORRECTION";
+    public static final String ENABLE_SYNONYM_CORRECTION_KEY = "ENABLE_SYNONYM_CORRECTION";
+    public static final String ENABLE_INVERT_ORDER_CORRECTION_KEY = "ENABLE_INVERT_ORDER_CORRECTION";
+    public static final String ENABLE_RECOMMEND_KEY = "ENABLE_RECOMMEND";
+    public static final String MAX_RECOMMEND_NUM_KEY = "MAX_RECOMMEND_NUM";
+    public static final String CORRECTION_THRESHOLD_LEVEL_KEY = "CORRECTION_THRESHOLD_LEVEL";
     
     public static final String OLD_NAME = "old_text";
     public static final String LIKELY_NAME_ARR = "likely_names";
