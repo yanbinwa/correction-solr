@@ -13,12 +13,12 @@ public class Constants
     public static final String CONSUL_SERVICE_URL_KEY = "CONSUL_SERVICE_URL_KEY";
     public static final String CONSUL_KEY_PREFIX_KEY = "CONSUL_KEY_PREFIX_KEY";
     public static final String RUN_ON_LOCAL_KEY = "RUN_ON_LOCAL_KEY";
-    public static final String APPID_KEY = "APPID_KEY";
     public static final int CONSUL_INTERVAL_TIME = 2;
     public static final int CONSUL_WAIT_TIME = 2;
     public static final String CONSUL_VALUE_JSON_KEY_URL = "url";
     public static final String CONSUL_VALUE_JSON_KEY_VERSION = "version";
     public static final String LINE_SPLIT_REGEX = "\\r\\n|\\n|\\r";
+    public static final String LINE_FIELD_SPLIT = "\t";
     public static final int CONSUL_JOIN_TIME = 20;
     
     //Tomcat配置
@@ -35,10 +35,14 @@ public class Constants
     //Solr查询配置
     public static final String SOLR_SENTENCE_FIELD = "sentence";
     public static final String SOLR_SENTENCE_SYN_FIELD = "sentence_syn";
+    public static final String APPID_KEY = "APPID_KEY";
+    public static final String FIELD_KEY = "FIELD_KEY";
+    public static final String FIELD_SPLIT = ",";
     
     //纠错算法中的调节参数
     /* Solr结果中score的最大值，如果大于最大值，取该最大值作为Solr的score */
     public static final float SOLR_MAX_SCORE = 6f;
+    
     /* 通过Solr得到的score做梯度下降截取候选的词条*/
     public static final float SCORE_THRESHOLD_RATE_PROTENTIAL = 3 / 1.0f;
     public static final float SCORE_THRESHOLD_PROTENTIAL = 2.0f;

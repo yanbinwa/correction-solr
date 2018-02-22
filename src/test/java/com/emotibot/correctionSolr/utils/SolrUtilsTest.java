@@ -30,7 +30,7 @@ public class SolrUtilsTest
     @Test
     public void test()
     {
-        test6();
+        test5();
     }
     
     @SuppressWarnings("unused")
@@ -132,14 +132,10 @@ public class SolrUtilsTest
     private void test5()
     {
         String text = "可不可以把代孕母亲放给我看";
-        QueryElement queryEle = QueryElementUtils.getQueryElement(APPID, text, DatabaseType.WORD_SYN_DATABASE);
+        List<String> fields = new ArrayList<String>();
+        fields.add("video");
+        QueryElement queryEle = QueryElementUtils.getQueryElement(APPID, fields, text, DatabaseType.WORD_SYN_DATABASE);
         List<ResultElement> retEles = SolrUtils.querySolrData(queryEle, "sentence_original");
         System.out.println(retEles);
-    }
-    
-    @SuppressWarnings("unused")
-    private void test6()
-    {
-        SolrUtils.loadSynonymToSolrByFile();
     }
 }

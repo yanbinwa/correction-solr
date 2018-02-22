@@ -1,5 +1,7 @@
 package com.emotibot.correctionSolr.element;
 
+import java.util.List;
+
 import com.emotibot.middleware.utils.JsonUtils;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -47,6 +49,10 @@ public class QueryElement
     @SerializedName("appid")
     @Expose
     private String appid;
+    
+    @SerializedName("fields")
+    @Expose
+    private List<String> fields;
     
     public QueryElement()
     {
@@ -157,6 +163,16 @@ public class QueryElement
     public String getAppid()
     {
         return this.appid;
+    }
+    
+    public void setFields(List<String> fields)
+    {
+        this.fields = fields;
+    }
+    
+    public List<String> getFields()
+    {
+        return this.fields;
     }
     
     @Override

@@ -17,16 +17,18 @@ public class SolrCorrectionController
     CorrectionSolrService correctionSolrService;
     
     @RequestMapping(value="/getCorrectionName", method = RequestMethod.GET)
-    public String getCorrectionName(@RequestParam(value="text", required=true) String sentence,
-            @RequestParam(value="appid", required=true) String appid)
+    public String getCorrectionName(@RequestParam(value="text", required = true) String sentence,
+            @RequestParam(value="appid", required = true) String appid,
+            @RequestParam(value="fields", required = false) String fields)
     {
-        return correctionSolrService.getCorrectionName(appid, sentence);
+        return correctionSolrService.getCorrectionName(appid, sentence, fields);
     }
     
     @RequestMapping(value="/postCorrectionName", method = RequestMethod.POST)
     public String postCorrectionName(@RequestBody String sentence, 
-            @RequestParam(value="appid", required=true) String appid)
+            @RequestParam(value="appid", required = true) String appid,
+            @RequestParam(value="fields", required = false) String fields)
     {
-        return correctionSolrService.getCorrectionName(appid, sentence);
+        return correctionSolrService.getCorrectionName(appid, sentence, fields);
     }
 }

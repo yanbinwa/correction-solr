@@ -52,11 +52,13 @@ public class CorrectionStep extends AbstractStep
         super(executorService);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void beforeRun(Context context)
     {
         String sentence = (String) context.getValue(Constants.SENTENCE_KEY);
         String appid = (String) context.getValue(Constants.APPID_KEY);
+        List<String> fields = (List<String>) context.getValue(Constants.FIELD_KEY);
         if (StringUtils.isEmpty(sentence) || StringUtils.isEmpty(appid))
         {
             return;
@@ -65,7 +67,7 @@ public class CorrectionStep extends AbstractStep
         List<QueryElement> queryElementList = new ArrayList<QueryElement>();
         for (DatabaseType type : SolrUtils.databaseType)
         {
-            QueryElement queryElement = QueryElementUtils.getQueryElement(appid, sentence, type);
+            QueryElement queryElement = QueryElementUtils.getQueryElement(appid, fields, sentence, type);
             if (queryElement != null)
             {
                 queryElementList.add(queryElement);

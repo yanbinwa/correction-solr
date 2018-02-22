@@ -1,5 +1,7 @@
 package com.emotibot.correctionSolr.utils;
 
+import java.util.List;
+
 import com.emotibot.correction.utils.PinyinUtils;
 import com.emotibot.correction.utils.SegementUtils;
 import com.emotibot.correctionSolr.constants.Constants;
@@ -8,13 +10,14 @@ import com.emotibot.correctionSolr.element.QueryElement;
 
 public class QueryElementUtils
 {
-    public static QueryElement getQueryElement(String appid, String text, DatabaseType type)
+    public static QueryElement getQueryElement(String appid, List<String> fields, String text, DatabaseType type)
     {
         QueryElement queryElement = new QueryElement();
         queryElement.setFl("*,score");
         queryElement.setFq("database:" + type.name());
         queryElement.setDatabase(type);
         queryElement.setAppid(appid);
+        queryElement.setFields(fields);
         String q = null;
         switch(type)
         {

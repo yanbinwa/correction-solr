@@ -1,9 +1,6 @@
 package com.emotibot.correctionSolr.utils;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -165,16 +162,28 @@ public class SolrUtils
         params.set("q", query.getQ());
         params.set("start", query.getStart());
         params.set("rows", query.getRows());
-        SolrQuery filterQuery = new SolrQuery();
-        params.add(filterQuery);
-        filterQuery.add("appid:" + query.getAppid());
+        params.addFilterQuery("appid:" + query.getAppid());
         if (!StringUtils.isEmpty(query.getFl()))
         {
             params.set("fl", query.getFl());
         }
         if (!StringUtils.isEmpty(query.getFq()))
         {
-            filterQuery.add(query.getFq());
+            params.addFilterQuery(query.getFq());
+        }
+        if (query.getFields() != null)
+        {
+            List<String> fields = query.getFields();
+            String str = "";
+            for(int i = 0; i < fields.size(); i ++)
+            {
+                if (i != 0)
+                {
+                    str += " OR ";
+                }
+                str += "field:" + fields.get(i);
+            }
+            params.addFilterQuery(str);
         }
         if (!StringUtils.isEmpty(query.getDefType()))
         {
@@ -265,45 +274,6 @@ public class SolrUtils
         finally
         {
             lock.unlock();
-        }
-    }
-    
-    public static void loadSynonymToSolrByFile()
-    {
-        String originalFile = ConfigManager.INSTANCE.getPropertyString(com.emotibot.correction.constants.Constants.ORIGIN_FILE_PATH);
-        Set<String> synonymSet = new HashSet<String>();
-        BufferedReader br = null; 
-        try
-        {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(originalFile)));
-            String line = null;
-            while((line = br.readLine()) != null)
-            {
-                synonymSet.add(line.trim());
-            }
-            if (synonymSet.size() > 0)
-            {
-                loadSynonymToSolr("5a200ce8e6ec3a6506030e54ac3b970e", synonymSet, true);
-            }
-            logger.info("Solr update successful");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (br != null)
-            {
-                try
-                {
-                    br.close();
-                } 
-                catch (IOException e)
-                {
-                    
-                }
-            }
         }
     }
     

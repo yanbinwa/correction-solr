@@ -1,5 +1,7 @@
 package com.emotibot.correctionSolr.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -34,11 +36,21 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
     private CorrectionStep correctionStep = new CorrectionStep(executorService);
     
     @Override
-    public String getCorrectionName(String appid, String text)
+    public String getCorrectionName(String appid, String text, String fields)
     {
         Context context = new Context();
         context.setValue(Constants.SENTENCE_KEY, text.trim());
-        context.setValue(Constants.APPID_KEY, text.trim());
+        context.setValue(Constants.APPID_KEY, appid.trim());
+        if (!StringUtils.isEmpty(fields))
+        {
+            List<String> fieldList = new ArrayList<String>();
+            String[] fieldArray = fields.split(Constants.FIELD_SPLIT);
+            for (String field : fieldArray)
+            {
+                fieldList.add(field.trim());
+            }
+            context.setValue(Constants.FIELD_KEY, fieldList);
+        }
         correctionSentence(context);
         String result = getCorrection(context);
         return result;

@@ -2,32 +2,50 @@ package com.emotibot.correctionSolr.utils;
 
 import com.emotibot.correction.utils.PinyinUtils;
 import com.emotibot.correction.utils.SegementUtils;
+import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.element.CorrectionElement;
 import com.emotibot.correctionSolr.element.DatabaseType;
 
 public class CorrectionElementUtils
 {
     
-    public static CorrectionElement getCorrectionElement(String appid, String text, String id, DatabaseType type)
+    public static CorrectionElement getCorrectionElement(String appid, String line, String id, DatabaseType type)
     {
+        String[] elements = line.split(Constants.LINE_FIELD_SPLIT);
+        if (elements.length < 2)
+        {
+            return null;
+        }
+        String field = elements[0].trim();
+        String text = elements[1].trim();
+        CorrectionElement correctionElement = new CorrectionElement();
+        correctionElement.setId(id);
+        correctionElement.setAppid(appid);
+        correctionElement.setField(field);
         switch(type)
         {
         case SINGLE_WORD_DATABASE:
-            return getSingleWordElement(appid, text, id);
+            getSingleWordElement(correctionElement, text);
+            break;
         case WORD_DATABASE:
-            return getWordElement(appid, text, id);
+            getWordElement(correctionElement, text);
+            break;
         case WORD_SYN_DATABASE:
-            return getSynWordElement(appid, text, id);
+            getSynWordElement(correctionElement, text);
+            break;
         case PINYING_WORD_DATABASE:
-            return getPinyinElement(appid, text, id);
+            getPinyinElement(correctionElement, text);
+            break;
         case PINYING2_WORD_DATABASE:
-            return getPinyin2Element(appid, text, id);
+            getPinyin2Element(correctionElement, text);
+            break;
         default:
             return null;
         }
+        return correctionElement;
     }
     
-    private static CorrectionElement getSingleWordElement(String appid, String text, String id)
+    private static void getSingleWordElement(CorrectionElement correctionElement, String text)
     {
         char[] str2char = text.toCharArray();
         String singleWordStr = "";
@@ -35,17 +53,13 @@ public class CorrectionElementUtils
         {
             singleWordStr += String.valueOf(str2char[t]) + " ";
         }
-        CorrectionElement singleWordEle = new CorrectionElement();
-        singleWordEle.setId(id);
-        singleWordEle.setSentence(singleWordStr.trim());
-        singleWordEle.setSentence_syn(singleWordStr.trim());
-        singleWordEle.setSentence_original(text);
-        singleWordEle.setDatabase(DatabaseType.SINGLE_WORD_DATABASE.name());
-        singleWordEle.setAppid(appid);
-        return singleWordEle;
+        correctionElement.setSentence(singleWordStr.trim());
+        correctionElement.setSentence_syn(singleWordStr.trim());
+        correctionElement.setSentence_original(text);
+        correctionElement.setDatabase(DatabaseType.SINGLE_WORD_DATABASE.name());
     }
     
-    private static CorrectionElement getWordElement(String appid, String text, String id)
+    private static void getWordElement(CorrectionElement correctionElement, String text)
     {
         String[] words = SegementUtils.segementString(text);
         String wordsStr = "";
@@ -53,17 +67,13 @@ public class CorrectionElementUtils
         {
             wordsStr += String.valueOf(words[t]) + " ";
         }
-        CorrectionElement wordEle = new CorrectionElement();
-        wordEle.setId(id);
-        wordEle.setSentence(wordsStr.trim());
-        wordEle.setSentence_syn(wordsStr.trim());
-        wordEle.setSentence_original(text);
-        wordEle.setDatabase(DatabaseType.WORD_DATABASE.name());
-        wordEle.setAppid(appid);
-        return wordEle;
+        correctionElement.setSentence(wordsStr.trim());
+        correctionElement.setSentence_syn(wordsStr.trim());
+        correctionElement.setSentence_original(text);
+        correctionElement.setDatabase(DatabaseType.WORD_DATABASE.name());
     }
     
-    private static CorrectionElement getSynWordElement(String appid, String text, String id)
+    private static void getSynWordElement(CorrectionElement correctionElement, String text)
     {
         String[] words = SegementUtils.segementString(text);
         String wordsStr = "";
@@ -71,17 +81,13 @@ public class CorrectionElementUtils
         {
             wordsStr += String.valueOf(words[t]) + " ";
         }
-        CorrectionElement wordEle = new CorrectionElement();
-        wordEle.setId(id);
-        wordEle.setSentence(wordsStr.trim());
-        wordEle.setSentence_syn(wordsStr.trim());
-        wordEle.setSentence_original(text);
-        wordEle.setDatabase(DatabaseType.WORD_SYN_DATABASE.name());
-        wordEle.setAppid(appid);
-        return wordEle;
+        correctionElement.setSentence(wordsStr.trim());
+        correctionElement.setSentence_syn(wordsStr.trim());
+        correctionElement.setSentence_original(text);
+        correctionElement.setDatabase(DatabaseType.WORD_SYN_DATABASE.name());
     }
     
-    private static CorrectionElement getPinyinElement(String appid, String text, String id)
+    private static void getPinyinElement(CorrectionElement correctionElement, String text)
     {
         String pinyins = PinyinUtils.getPinyin(text);
         String[] pinyinArray = pinyins.split(PinyinUtils.PINYIN_SPLIT);
@@ -90,17 +96,13 @@ public class CorrectionElementUtils
         {
             pinyinStr += String.valueOf(pinyinArray[t]) + " ";
         }
-        CorrectionElement pinyingEle = new CorrectionElement();
-        pinyingEle.setId(id);
-        pinyingEle.setSentence(pinyinStr.trim());
-        pinyingEle.setSentence_syn(pinyinStr.trim());
-        pinyingEle.setSentence_original(text);
-        pinyingEle.setDatabase(DatabaseType.PINYING_WORD_DATABASE.name());
-        pinyingEle.setAppid(appid);
-        return pinyingEle;
+        correctionElement.setSentence(pinyinStr.trim());
+        correctionElement.setSentence_syn(pinyinStr.trim());
+        correctionElement.setSentence_original(text);
+        correctionElement.setDatabase(DatabaseType.PINYING_WORD_DATABASE.name());
     }
     
-    private static CorrectionElement getPinyin2Element(String appid, String text, String id)
+    private static void getPinyin2Element(CorrectionElement correctionElement, String text)
     {
         String pinyin2s = PinyinUtils.getPinyin2(text);
         String[] pinyin2Array = pinyin2s.split(PinyinUtils.PINYIN_SPLIT);
@@ -109,13 +111,9 @@ public class CorrectionElementUtils
         {
             pinyin2Str += String.valueOf(pinyin2Array[t]) + " ";
         }
-        CorrectionElement pinying2Ele = new CorrectionElement();
-        pinying2Ele.setId(id);
-        pinying2Ele.setSentence(pinyin2Str.trim());
-        pinying2Ele.setSentence_syn(pinyin2Str.trim());
-        pinying2Ele.setSentence_original(text);
-        pinying2Ele.setDatabase(DatabaseType.PINYING2_WORD_DATABASE.name());
-        pinying2Ele.setAppid(appid);
-        return pinying2Ele;
+        correctionElement.setSentence(pinyin2Str.trim());
+        correctionElement.setSentence_syn(pinyin2Str.trim());
+        correctionElement.setSentence_original(text);
+        correctionElement.setDatabase(DatabaseType.PINYING2_WORD_DATABASE.name());
     }
 }

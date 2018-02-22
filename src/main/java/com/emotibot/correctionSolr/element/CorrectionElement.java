@@ -22,6 +22,9 @@ public class CorrectionElement
     @Field
     private String appid;
     
+    @Field
+    private String field;
+    
     public CorrectionElement()
     {
         
@@ -85,5 +88,15 @@ public class CorrectionElement
     public String getAppid()
     {
         return this.appid;
+    }
+    
+    public void setField(String field)
+    {
+        this.field = field;
+    }
+    
+    public String getField()
+    {
+        return this.field;
     }
 }
