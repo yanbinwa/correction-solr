@@ -4,7 +4,7 @@
 针对给定的字符串，在限定的词库范围内进行纠错，使用场景如：电影名纠错，音乐名纠错等。纠错的范围有同音字纠错（狼牙棒->琅琊榜），同义词纠错（单亲母亲->单亲妈妈），语序颠倒纠错(曼侧斯特的海边->海边的曼侧斯特)。项目依赖于solr和consul，其中solr用于初步的检索，consul用于词库的动态加载。
 ```
 
-## correction安装
+## correction依赖服务的安装
 ### clone工程
 ```
 git clone git@github.com:yanbinwa/correction-solr.git
@@ -100,64 +100,34 @@ field + “\t” + 词条
 
 ```
 
-## correction配置
+##correction安装
+
+### correction配置
 ```
-correction的配置位于docker/idc.env文件中，具体内容如下
-
-CS_HOST_SERVER_PORT: 纠错服务在宿主机的端口号
-CS_SERVER_PORT: 纠错服务在docker中的端口号
-
-SOLR_URL_KEY: solr服务的url
-
-ORIGIN_FILE_PATH_KEY: 词库文件路径，已经弃用
-COMMON_SENTENCE_FILE_PATH_KEY: 模板文件路径，已经弃用
-COMMAND_FILE_PATH_KEY: 指令词库文件路径，已经弃用
-
-TOMCAT_MAX_CONNECTION_KEY: Tomcat的最大连接数
-TOMCAT_MAX_THREAD_KEY: Tomcat请求处理的最大线程数
-TOMCAT_MAX_TIMEOUT_KEY: Tomcat连接的超时
-
-CONSUL_SERVICE_URL_KEY: Consul服务的url
-CONSUL_KEY_PREFIX_KEY: 词库信息在Consul中的路径，不包含appid
-RUN_ON_LOCAL_KEY: 代码调试配置，如果为true，会将词库下载Url的IP替换（例如172.17.0.1 –>172.16.101.61），保证代码调试正常运行，生成环境应设为false
-
-ENABLE_HOMONYM_CORRECTION_KEY: 是否支持同音词纠错
-ENABLE_SYNONYM_CORRECTION_KEY: 是否支持同义词纠错
-ENABLE_INVERT_ORDER_CORRECTION_KEY: 是否支持语序颠倒纠错
-MAX_RECOMMEND_NUM_KEY: 最多输出结果的个数，即当返回纠错结果中有得分相近的，可以作为推荐输出
-CORRECTION_THRESHOLD_LEVEL_KEY: 值为0、1、2，对应输出结果得分的阈值；0为最低阈值，即尽量给出纠错结果，但同时也会给出错误的纠错结果；2为最高阈值，即宁可不给出纠错结果，也不给出错误的纠错结果；1为这两者之间。
-
-CS_LOG_LEVEL: 服务的日志配置
-
-举例：
-
-CS_HOST_SERVER_PORT=9101
-CS_SERVER_PORT=9101
-
-SOLR_URL_KEY=http://172.16.101.61:8081/solr/correction_standard
-
-ORIGIN_FILE_PATH_KEY=/usr/src/correction-solr/file/correction.txt
-COMMON_SENTENCE_FILE_PATH_KEY=/usr/src/correction-solr/file/commonSentence.txt
-COMMAND_FILE_PATH_KEY=/usr/src/correction-solr/file/command.txt
-
-TOMCAT_MAX_CONNECTION_KEY=100
-TOMCAT_MAX_THREAD_KEY=100
-TOMCAT_MAX_TIMEOUT_KEY=30000
-
-CONSUL_SERVICE_URL_KEY=http://172.16.101.61:8500/
-CONSUL_KEY_PREFIX_KEY=idc/correction
-RUN_ON_LOCAL_KEY=true
-
-ENABLE_HOMONYM_CORRECTION_KEY=true
-ENABLE_SYNONYM_CORRECTION_KEY=true
-ENABLE_INVERT_ORDER_CORRECTION_KEY=true
-ENABLE_RECOMMEND_KEY=false
-MAX_RECOMMEND_NUM_KEY=0
-CORRECTION_THRESHOLD_LEVEL_KEY=1
-
-CS_LOG_LEVEL=INFO,stdout,file
-
+correction的配置位于docker/idc.env文件中
 ```
+
+#### 说明
+| 参数 | 类型	| 可选 | 说明 | 举例
+------|------|-----	|------
+CS_HOST_SERVER_PORT	| int	| 必须	| 纠错服务在宿主机的端口号	|	9101
+CS_SERVER_PORT	| int	| 必须	| 纠错服务在docker中的端口号	|	9101
+SOLR_URL_KEY	| String	| 必须	| solr服务的url	|	http://172.16.101.61:8081/solr/correction_standard
+ORIGIN_FILE_PATH_KEY	| String	| 必须	| 词库文件路径，已经弃用	|	
+COMMON_SENTENCE_FILE_PATH_KEY	| String	| 必须	| 模板文件路径，已经弃用	|
+COMMAND_FILE_PATH_KEY	| String	| 必须	| 指令词库文件路径，已经弃用	|
+TOMCAT_MAX_CONNECTION_KEY	| int	| 必须	| Tomcat的最大连接数	|	100
+TOMCAT_MAX_THREAD_KEY	| int	| 必须	| Tomcat请求处理的最大线程数	|	100
+TOMCAT_MAX_TIMEOUT_KEY	| int	| 必须	| Tomcat连接的超时	|	30000
+CONSUL_SERVICE_URL_KEY	| String	| 必须	| Consul服务的url	|	http://172.16.101.61:8500/
+CONSUL_KEY_PREFIX_KEY	| String	| 必须	| 词库信息在Consul中的路径，不包含appid	|	idc/correction
+RUN_ON_LOCAL_KEY	| boolean	| 必须	| 代码调试配置，如果为true，会将词库下载Url的IP替换（例如172.17.0.1 –>172.16.101.61），保证代码调试正常运行，生成环境应设为false	|	false
+ENABLE_HOMONYM_CORRECTION_KEY	| boolean	| 必须	| 是否支持同音词纠错	|	true
+ENABLE_SYNONYM_CORRECTION_KEY	| boolean	| 必须	| 是否支持同义词纠错	|	true
+ENABLE_INVERT_ORDER_CORRECTION_KEY	| boolean	| 必须	| 是否支持语序颠倒纠错	|	true
+MAX_RECOMMEND_NUM_KEY	| int	| 必须	| 最多输出结果的个数，即当返回纠错结果中有得分相近的，可以作为推荐输出	|	1
+CORRECTION_THRESHOLD_LEVEL_KEY	| int	| 必须	| 值为0、1、2，对应输出结果得分的阈值；0为最低阈值，即尽量给出纠错结果，但同时也会给出错误的纠错结果；2为最高阈值，即宁可不给出纠错结果，也不给出错误的纠错结果；1为这两者之间	|	1
+CS_LOG_LEVEL	| String	| 必须	| 服务的日志配置	|	INFO,stdout,file
 
 ### 打包、安装Correction Docker
 ```
