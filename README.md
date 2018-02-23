@@ -74,7 +74,7 @@ mkdir -p CONSUL_DATA_PATH
 ```
 1. 在consul中写入词库信息
 
-curl -XPUT 'http://172.16.101.61:8500/v1/kv/idc/templates/5a200ce8e6ec3a6506030e54ac3b970e' -d '{"version":"1","url":"http://172.17.0.1/Files/settings/correction/dictionary.txt"}'
+curl -XPUT 'http://localhost:8500/v1/kv/idc/templates/5a200ce8e6ec3a6506030e54ac3b970e' -d '{"version":"1","url":"http://172.17.0.1/Files/settings/correction/dictionary.txt"}'
 
 说明：
 以上命令是在consul的/idc/templates/5a200ce8e6ec3a6506030e54ac3b970e目录下写入词库信息
