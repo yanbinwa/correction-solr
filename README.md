@@ -144,11 +144,11 @@ docker push docker-reg.emotibot.com.cn:55688/correction-standard:$TAG
 GET /correction/getCorrectionName
 ```
 ### 请求
-| 参数 | 类型	| 可选 | 说明
-------|------|-----	|------
-appid	| string	| 必须	| APPID
-fields	| string	| 必须	| 可以输入多个field，中间通过","隔开
-text		| string	| 必须	| 需要纠错的字符串
+| 参数 | 类型	| 可选 | 说明	| 举例
+------|------|------|------|------
+appid	| string	| 必须	| APPID	|	5a200ce8e6ec3a6506030e54ac3b970e
+fields	| string	| 必须	| 可以输入多个field，中间通过","隔开	|	music,video
+text		| string	| 必须	| 需要纠错的字符串	|	我们的哎
 
 ### 响应
 ```
