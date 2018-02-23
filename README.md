@@ -100,7 +100,7 @@ field + “\t” + 词条
 
 ```
 
-##correction安装
+## correction安装
 
 ### correction配置
 ```
@@ -109,7 +109,7 @@ correction的配置位于docker/idc.env文件中
 
 #### 说明
 | 参数 | 类型	| 可选 | 说明 | 举例
-------|------|-----	|------
+------|------|------|------|------
 CS_HOST_SERVER_PORT	| int	| 必须	| 纠错服务在宿主机的端口号	|	9101
 CS_SERVER_PORT	| int	| 必须	| 纠错服务在docker中的端口号	|	9101
 SOLR_URL_KEY	| String	| 必须	| solr服务的url	|	http://172.16.101.61:8081/solr/correction_standard
