@@ -8,8 +8,8 @@
 ### clone工程
 ```
 git clone git@github.com:yanbinwa/correction-solr.git
+cd correction-solr
 git checkout -b correction_standard origin/correction_standard
-cd correction_standard
 ROOT_PATH=$(pwd)
 ```
 
