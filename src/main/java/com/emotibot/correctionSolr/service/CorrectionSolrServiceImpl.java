@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.step.CorrectionStep;
-import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.middleware.context.Context;
 import com.emotibot.middleware.utils.JsonUtils;
 import com.emotibot.middleware.utils.StringUtils;
@@ -72,7 +71,7 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
             correctionNameArrStr = new JsonArray().toString();
         }
         String sentence = (String) context.getValue(Constants.SENTENCE_KEY);
-        String oldName = CorrectionUtils.getLikelyCorrection2(sentence);
+        String oldName = sentence;
         if (StringUtils.isEmpty(oldName))
         {
             oldName = "";

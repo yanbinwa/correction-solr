@@ -10,9 +10,9 @@ public class Constants
     public static final int SOLR_SO_TIMEOUT = 30000;
     
     //词库
-    public static final String CONSUL_SERVICE_URL_KEY = "CONSUL_SERVICE_URL_KEY";
-    public static final String CONSUL_KEY_PREFIX_KEY = "CONSUL_KEY_PREFIX_KEY";
-    public static final String RUN_ON_LOCAL_KEY = "RUN_ON_LOCAL_KEY";
+    public static final String CONSUL_SERVICE_URL_KEY = "CONSUL_SERVICE_URL";
+    public static final String CONSUL_KEY_PREFIX_KEY = "CONSUL_KEY_PREFIX";
+    public static final String RUN_ON_LOCAL_KEY = "RUN_ON_LOCAL";
     public static final int CONSUL_INTERVAL_TIME = 2;
     public static final int CONSUL_WAIT_TIME = 2;
     public static final String CONSUL_VALUE_JSON_KEY_URL = "url";

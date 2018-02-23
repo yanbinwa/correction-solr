@@ -9,6 +9,20 @@
 
 # Prepare config file
 
+rm -rf conf
+mkdir -p conf
+
+while read line
+do
+    eval echo "$line" >> config/env
+done < docker/template/config.template
+
+while read line
+do
+    tmp=`eval echo "$line"|sed "s/\"//g"`
+    echo $tmp >> config/log4j.properties
+done < docker/template/log4j.template
+
 java -Dfile.encoding=UTF8 \
      -Dlog4j.configuration="file:conf/log4j.properties" \
      -DCONFIG_PATH="conf/env" \

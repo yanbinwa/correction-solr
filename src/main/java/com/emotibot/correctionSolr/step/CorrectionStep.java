@@ -205,7 +205,7 @@ public class CorrectionStep extends AbstractStep
     }
     
     /**
-     * 通过编辑距离来进行调节
+     * 通过编辑距离来对solr的得分进行调节
      * 
      * 需要降低召回率，所以要进行细化
      * 
