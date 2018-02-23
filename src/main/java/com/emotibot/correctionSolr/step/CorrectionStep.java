@@ -39,7 +39,6 @@ public class CorrectionStep extends AbstractStep
 {
     private static final Logger logger = Logger.getLogger(CorrectionStep.class);
     private static boolean enableHomonym = ConfigManager.INSTANCE.getPropertyBoolean(Constants.ENABLE_HOMONYM_CORRECTION_KEY);
-    private static boolean enableRecommend = ConfigManager.INSTANCE.getPropertyBoolean(Constants.ENABLE_RECOMMEND_KEY);
     private static int maxRecommendNum = ConfigManager.INSTANCE.getPropertyInt(Constants.MAX_RECOMMEND_NUM_KEY);
     private static boolean enableInvertOrder = ConfigManager.INSTANCE.getPropertyBoolean(Constants.ENABLE_INVERT_ORDER_CORRECTION_KEY);
     
@@ -336,12 +335,8 @@ public class CorrectionStep extends AbstractStep
         List<ResultElement> tmp = new ArrayList<ResultElement>();
         float lastScore = potentialResult.get(0).getScore();
         tmp.add(potentialResult.get(0));
-        int recommendNum;
-        if (enableRecommend)
-        {
-            recommendNum = maxRecommendNum;
-        }
-        else
+        int recommendNum = maxRecommendNum;
+        if (recommendNum <= 0)
         {
             recommendNum = 1;
         }

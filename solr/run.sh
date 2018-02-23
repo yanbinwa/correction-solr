@@ -1,17 +1,15 @@
 #!/bin/bash
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $DIR/idc.env
-if [ $? -ne 0 ]; then
+if [ "$#" -ne 1 ];then
   echo "Erorr, can't open envfile: $1"
   exit 1
 fi
+source $1
 
 CNAME=solr
 DOCKER_IMG="solr:5.5"
 
-VOL=$DIR/data
-mkdir -p $VOL
 cp $DIR/conf/solr.xml $VOL/
 
 SOLR_PORT=8081

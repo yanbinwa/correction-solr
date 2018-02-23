@@ -41,7 +41,7 @@ public class Constants
     
     //纠错算法中的调节参数
     /* Solr结果中score的最大值，如果大于最大值，取该最大值作为Solr的score */
-    public static final float SOLR_MAX_SCORE = 6f;
+    public static final float SOLR_MAX_SCORE = 5f;
     
     /* 通过Solr得到的score做梯度下降截取候选的词条*/
     public static final float SCORE_THRESHOLD_RATE_PROTENTIAL = 3 / 1.0f;
