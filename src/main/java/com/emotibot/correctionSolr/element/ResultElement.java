@@ -18,6 +18,10 @@ public class ResultElement
     @Expose
     private DatabaseType database;
     
+    @SerializedName("field")
+    @Expose
+    private String field;
+    
     public ResultElement()
     {
         
@@ -29,11 +33,12 @@ public class ResultElement
         this.result = result;
     }
     
-    public ResultElement(float score, String result, DatabaseType database)
+    public ResultElement(float score, String result, DatabaseType database, String field)
     {
         this.score = score;
         this.result = result;
         this.database = database;
+        this.field = field;
     }
     
     public void setScore(float score)
@@ -64,6 +69,16 @@ public class ResultElement
     public DatabaseType getDatabase()
     {
         return this.database;
+    }
+    
+    public void setField(String field)
+    {
+        this.field = field;
+    }
+    
+    public String getField()
+    {
+        return this.field;
     }
     
     @Override

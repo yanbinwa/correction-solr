@@ -210,7 +210,8 @@ public class SolrUtils
             {
                 Float score = (Float) doc.getFieldValue("score");
                 String result = (String) doc.getFieldValue(retField);
-                ResultElement resultElement = new ResultElement(score, result, query.getDatabase());
+                String field = (String) doc.getFieldValue("field");
+                ResultElement resultElement = new ResultElement(score, result, query.getDatabase(), field);
                 ret.add(resultElement);
             }
             return ret;

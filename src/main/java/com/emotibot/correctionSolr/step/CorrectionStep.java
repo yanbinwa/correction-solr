@@ -27,6 +27,7 @@ import com.emotibot.middleware.context.Context;
 import com.emotibot.middleware.response.Response;
 import com.emotibot.middleware.step.AbstractStep;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * 生成不同的query，分配到task中
@@ -141,7 +142,10 @@ public class CorrectionStep extends AbstractStep
         JsonArray output = new JsonArray();
         for (ResultElement element : ret)
         {
-            output.add(element.getResult());
+            JsonObject elementObj = new JsonObject();
+            elementObj.addProperty(Constants.NAME, element.getResult());
+            elementObj.addProperty(Constants.FIELD, element.getField());
+            output.add(elementObj);
         }
         context.setValue(Constants.CORRECTION_SENTENCE_KEY, output.toString());
         long end = System.currentTimeMillis();

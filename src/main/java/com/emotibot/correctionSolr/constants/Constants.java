@@ -80,4 +80,6 @@ public class Constants
     //返回结果中的key
     public static final String OLD_NAME = "old_text";
     public static final String LIKELY_NAME_ARR = "likely_names";
+    public static final String NAME = "name";
+    public static final String FIELD = "field";
 }
