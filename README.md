@@ -126,7 +126,7 @@ ENABLE_HOMONYM_CORRECTION_KEY	| boolean	| 必须	| 是否支持同音词纠错	|
 ENABLE_SYNONYM_CORRECTION_KEY	| boolean	| 必须	| 是否支持同义词纠错	|	true
 ENABLE_INVERT_ORDER_CORRECTION_KEY	| boolean	| 必须	| 是否支持语序颠倒纠错	|	true
 MAX_RECOMMEND_NUM_KEY	| int	| 必须	| 最多输出结果的个数，即当返回纠错结果中有得分相近的，可以作为推荐输出	|	1
-CORRECTION_THRESHOLD_LEVEL_KEY	| int	| 必须	| 值为0、1、2，对应输出结果得分的阈值；0为最低阈值，即尽量给出纠错结果，但同时也会给出错误的纠错结果；2为最高阈值，即宁可不给出纠错结果，也不给出错误的纠错结果；1为这两者之间	|	1
+CORRECTION_THRESHOLD_LEVEL_KEY	| int	| 必须	| 值为0、1、2，对应输出结果得分的阈值；0为最低阈值，即尽量给出纠错结果，但同时提升给出错误的纠错结果的几率；2为最高阈值，即宁可不给出纠错结果，也不x希望给出错误的纠错结果；1为这两者之间	|	1
 CS_LOG_LEVEL	| String	| 必须	| 服务的日志配置	|	INFO,stdout,file
 
 ### 打包、安装Correction Docker
