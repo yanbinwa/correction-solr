@@ -14,7 +14,6 @@ RUN mkdir -p /usr/src/correction-solr/log
 WORKDIR /usr/src/correction-solr
 
 COPY bin ./bin
-COPY conf ./conf
 COPY docker ./docker
 COPY file ./file
 

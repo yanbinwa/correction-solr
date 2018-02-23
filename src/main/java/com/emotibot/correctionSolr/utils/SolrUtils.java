@@ -86,6 +86,7 @@ public class SolrUtils
         } 
         catch (SolrServerException e)
         {
+            buildSolrClient();
             e.printStackTrace();
         } 
         catch (IOException e)
@@ -103,6 +104,7 @@ public class SolrUtils
         } 
         catch (SolrServerException e)
         {
+            buildSolrClient();
             e.printStackTrace();
         }
         catch (IOException e)
@@ -120,6 +122,7 @@ public class SolrUtils
         } 
         catch (SolrServerException e)
         {
+            buildSolrClient();
             e.printStackTrace();
         }
         catch (IOException e)
@@ -148,7 +151,13 @@ public class SolrUtils
             }
             return ret;
         } 
-        catch (SolrServerException | IOException e)
+        catch (SolrServerException e)
+        {
+            buildSolrClient();
+            e.printStackTrace();
+            return null;
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
             return null;
@@ -206,7 +215,13 @@ public class SolrUtils
             }
             return ret;
         } 
-        catch (SolrServerException | IOException e)
+        catch (SolrServerException e)
+        {
+            buildSolrClient();
+            e.printStackTrace();
+            return null;
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
             return null;

@@ -9,7 +9,6 @@
 
 # Prepare config file
 
-rm -rf conf
 mkdir -p conf
 
 while read line
