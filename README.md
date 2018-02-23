@@ -17,7 +17,7 @@ ROOT_PATH=$(pwd)
 ```
 1. 配置Solr的data目录映射(假设Solr中data目录在主机上的目录为"SOLR_DATA_PATH")
 
-sed 's/XXX/SOLR_DATA_PATH/g' solr/idc.env.template > solr/idc.env
+sed 's#XXX#SOLR_DATA_PATH#g' solr/idc.env.template > solr/idc.env
 rm -rf SOLR_DATA_PATH
 mkdir -p SOLR_DATA_PATH
 
@@ -56,7 +56,7 @@ cd $ROOT_PATH
 
 1. 配置Consul的data映射目录(假设Consul中data目录在主机上的目录为"CONSUL_DATA_PATH")
 
-sed 's/XXX/CONSUL_DATA_PATH/g' consul/idc.env.template > consul/idc.env
+sed 's#XXX#CONSUL_DATA_PATH#g' consul/idc.env.template > consul/idc.env
 rm -rf CONSUL_DATA_PATH
 mkdir -p CONSUL_DATA_PATH
 
