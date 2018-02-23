@@ -14,13 +14,13 @@ mkdir -p conf
 
 while read line
 do
-    eval echo "$line" >> config/env
+    eval echo "$line" >> conf/env
 done < docker/template/config.template
 
 while read line
 do
     tmp=`eval echo "$line"|sed "s/\"//g"`
-    echo $tmp >> config/log4j.properties
+    echo $tmp >> conf/log4j.properties
 done < docker/template/log4j.template
 
 java -Dfile.encoding=UTF8 \
