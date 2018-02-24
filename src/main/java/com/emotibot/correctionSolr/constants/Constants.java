@@ -82,4 +82,5 @@ public class Constants
     public static final String LIKELY_NAME_ARR = "likely_names";
     public static final String NAME = "name";
     public static final String FIELD = "field";
+    public static final String SCORE = "score";
 }

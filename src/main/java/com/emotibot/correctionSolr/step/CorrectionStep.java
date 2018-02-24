@@ -144,6 +144,7 @@ public class CorrectionStep extends AbstractStep
             JsonObject elementObj = new JsonObject();
             elementObj.addProperty(Constants.NAME, element.getResult());
             elementObj.addProperty(Constants.FIELD, element.getField());
+            elementObj.addProperty(Constants.SCORE, element.getScore());
             output.add(elementObj);
         }
         context.setValue(Constants.CORRECTION_SENTENCE_KEY, output.toString());
