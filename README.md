@@ -172,7 +172,7 @@ GET /correction/getCorrectionVideoName
 | 参数 | 类型	| 可选 | 说明	| 举例
 ------|------|------|------|------
 appid	| string	| 必须	| APPID	|	5a200ce8e6ec3a6506030e54ac3b970e
-text		| string	| 必须	| 需要纠错的字符串	|	我们的哎
+text		| string	| 必须	| 需要纠错的字符串	|	我想看大话东游
 
 #### 响应
 ```
@@ -196,7 +196,7 @@ GET /correction/getCorrectionMusicName
 | 参数 | 类型	| 可选 | 说明	| 举例
 ------|------|------|------|------
 appid	| string	| 必须	| APPID	|	5a200ce8e6ec3a6506030e54ac3b970e
-text		| string	| 必须	| 需要纠错的字符串	|	我们的哎
+text		| string	| 必须	| 需要纠错的字符串	|	我想听我们的哎
 
 #### 响应
 ```
