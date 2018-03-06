@@ -83,4 +83,6 @@ public class Constants
     public static final String NAME = "name";
     public static final String FIELD = "field";
     public static final String SCORE = "score";
+    public static final String FIELD_MOVIE = "video";
+    public static final String FIELD_MUSIC = "music";
 }

@@ -24,6 +24,20 @@ public class SolrCorrectionController
         return correctionSolrService.getCorrectionName(appid, sentence, fields);
     }
     
+    @RequestMapping(value="/getCorrectionVideoName", method = RequestMethod.GET)
+    public String getCorrectionVideoName(@RequestParam(value="text", required = true) String sentence,
+            @RequestParam(value="appid", required = true) String appid)
+    {
+        return correctionSolrService.getCorrectionVideoName(appid, sentence);
+    }
+    
+    @RequestMapping(value="/getCorrectionMusicName", method = RequestMethod.GET)
+    public String getCorrectionMusicName(@RequestParam(value="text", required = true) String sentence,
+            @RequestParam(value="appid", required = true) String appid)
+    {
+        return correctionSolrService.getCorrectionMusicName(appid, sentence);
+    }
+    
     @RequestMapping(value="/postCorrectionName", method = RequestMethod.POST)
     public String postCorrectionName(@RequestBody String sentence, 
             @RequestParam(value="appid", required = true) String appid,

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.emotibot.correctionSolr.constants.Constants;
 import com.emotibot.correctionSolr.step.CorrectionStep;
+import com.emotibot.correctionSolr.utils.CorrectionUtils;
 import com.emotibot.middleware.context.Context;
 import com.emotibot.middleware.utils.JsonUtils;
 import com.emotibot.middleware.utils.StringUtils;
@@ -53,6 +54,23 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
         correctionSentence(context);
         String result = getCorrection(context);
         return result;
+    }
+    
+    @Override
+    public String getCorrectionVideoName(String appid, String text)
+    {
+        String adjustMovieName = CorrectionUtils.getLikelyCorrection2(text);
+        if (StringUtils.isEmpty(adjustMovieName))
+        {
+            adjustMovieName = text;
+        }
+        return getCorrectionName(appid, adjustMovieName, Constants.FIELD_MOVIE);
+    }
+
+    @Override
+    public String getCorrectionMusicName(String appid, String text)
+    {
+        return null;
     }
 
     private void correctionSentence(Context context)
