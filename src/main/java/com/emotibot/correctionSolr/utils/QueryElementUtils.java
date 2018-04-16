@@ -27,7 +27,7 @@ public class QueryElementUtils
             q= getWordQ(text);
             queryElement.setDefType("dismax");
             queryElement.setQf(Constants.SOLR_SENTENCE_SYN_FIELD);
-            queryElement.setFq(null);
+            //queryElement.setFq(null);
             break;
         case PINYING_WORD_DATABASE:
             q = getPinyinQ(text);

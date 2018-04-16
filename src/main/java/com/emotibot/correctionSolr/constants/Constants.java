@@ -42,7 +42,7 @@ public class Constants
     public static final float SCORE_THRESHOLD_RATE_PROTENTIAL = 3 / 1.0f;
     public static final float SCORE_THRESHOLD_RATE_RECOMMEND = 2 / 1.0f;
     public static final float SCORE_THRESHOLD_PROTENTIAL = 2.0f;
-    public static final float SCORE_THRESHOLD_RECOMMEND = 1.8f;
+    public static final float SCORE_THRESHOLD_RECOMMEND = 2.0f;
     public static final int RECOMMEND_NUM = 1;
     public static final int POTENTIAL_NUM = 10;
     public static final float SCORE_THRESHOLD_DIFF_PROTENTIAL = 0.3f;
@@ -52,12 +52,12 @@ public class Constants
     public static final float SYN_WORD_ADJUST_RATE = 1.0f;
     
     public static final float DISTANCE_TOTAL_MATCH_RATE = -1.0f;
-    public static final float DISTANCE_WITHOUT_ORDER_RATE = 0.3f;
-    public static final float DISTANCE_RATE = 0.3f;
+    public static final float DISTANCE_WITHOUT_ORDER_RATE = 0.4f;
+    public static final float DISTANCE_RATE = 0.4f;
     public static final float DISTANCE_SYN_SCORE = 0.5f;
     
     public static final float SCORE_THRESHOLD_DIFF_CHOOSE = 0.05f;
-    
+    public static final float SOLR_MAX_SCORE = 5f;
     
     //command
     public static final String COMMAND_FILE_PATH_KEY = "COMMAND_FILE_PATH";

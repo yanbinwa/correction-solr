@@ -21,6 +21,7 @@ import com.emotibot.correctionSolr.response.MyResponseType;
 import com.emotibot.correctionSolr.response.correction.CorrectionResponse;
 import com.emotibot.correctionSolr.task.CorrectionTask;
 import com.emotibot.correctionSolr.utils.CorrectionUtils;
+import com.emotibot.correctionSolr.utils.ExcludeSensenceUtils;
 import com.emotibot.correctionSolr.utils.QueryElementUtils;
 import com.emotibot.correctionSolr.utils.SolrUtils;
 import com.emotibot.middleware.context.Context;
@@ -52,6 +53,10 @@ public class CorrectionStep extends AbstractStep
     public void beforeRun(Context context)
     {
         String sentence = (String) context.getValue(Constants.SENTENCE_KEY);
+        if (ExcludeSensenceUtils.isExcludeSentence(sentence))
+        {
+            return;
+        }
         sentence = CorrectionUtils.getLikelyCorrection2(sentence);
         if (StringUtils.isEmpty(sentence))
         {
@@ -124,6 +129,7 @@ public class CorrectionStep extends AbstractStep
         List<ResultElement> ret = new ArrayList<ResultElement>(resultElementMap.values());
         ret = sortElement(ret);
         logger.debug("Sorted list: " + ret);
+        ret = adjustSolrScore(ret);
         ret = getPotentialResult(ret);
         String sentence = (String) context.getValue(Constants.SENTENCE_LIKELY_KEY);
         ret = getAdjustResult(ret, sentence);
@@ -160,7 +166,7 @@ public class CorrectionStep extends AbstractStep
         for (int i = 1; i < resultElements.size(); i ++)
         {
             float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
-            if ((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL && i >= Constants.POTENTIAL_NUM)
+            if (((resultElements.get(i).getScore() < scoreThreshold || scoreDiffTmp > scoreDiff) && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL) || i >= Constants.POTENTIAL_NUM)
             {
                 break;
             }
@@ -183,6 +189,11 @@ public class CorrectionStep extends AbstractStep
      * 2. 通过编辑距离计算结果（相似度）
      * 3. 是否通过同义词库得到的结果（）
      * 
+     * 去掉一些结果：
+     * 
+     * 1. 两个字对调，例如 京东 -> 东京
+     * 2. 输入是一个字，但是输出是多个字
+     * 
      * 从三方面得到的结果与之前的结果进行组合后得到最终结果
      * 
      * @param resultElements
@@ -195,10 +206,23 @@ public class CorrectionStep extends AbstractStep
         for (ResultElement retElement : resultElements)
         {
             SentenceElement element = new SentenceElement(retElement.getResult());
-            float distanceWithoutOrder = getDistanceWithoutOrder(element, targetElement) * Constants.DISTANCE_WITHOUT_ORDER_RATE;
-            float distance = (float) EditDistanceUtils.getEditDistance(element, targetElement) * Constants.DISTANCE_RATE;
-            float adjustScore = retElement.getScore() - distanceWithoutOrder - distance;
-            if (retElement.getDatabase().equals(DatabaseType.WORD_SYN_DATABASE) || retElement.getResult().length() >= 3)
+            float distanceWithoutOrder = getDistanceWithoutOrder(element, targetElement);
+            float distanceWithOrder = (float) EditDistanceUtils.getEditDistance(element, targetElement);
+            //如果初始的分数过高，导致后期无法纠正，这里需要通过目标片名的长度，与错误长度对比，再调整结果
+            float distance = distanceWithOrder * Constants.DISTANCE_RATE + distanceWithoutOrder * Constants.DISTANCE_WITHOUT_ORDER_RATE;
+            //int max = retElement.getResult().length();
+            int max = Math.max(targetElement.getLength(), retElement.getResult().length());
+            if (distance / (float) max > 0.45f)
+            {
+                distance += 1.0f;
+            }
+            if (isExcludeCase(element, targetElement, distanceWithOrder, distanceWithoutOrder))
+            {
+                distance += Constants.SOLR_MAX_SCORE;
+            }
+            float adjustScore = retElement.getScore() - distance;
+            
+            if (retElement.getDatabase().equals(DatabaseType.WORD_SYN_DATABASE) && retElement.getResult().length() >= 3)
             {
                 adjustScore += Constants.DISTANCE_SYN_SCORE;
             }
@@ -212,14 +236,15 @@ public class CorrectionStep extends AbstractStep
         }
         //再来一次梯度下降
         float scoreThreshold = Math.max(resultElements.get(0).getScore() / Constants.SCORE_THRESHOLD_RATE_RECOMMEND, Constants.SCORE_THRESHOLD_RECOMMEND);
-        float scoreDiff = Float.MAX_VALUE;
+        float scoreDiff = Constants.SCORE_THRESHOLD_DIFF_RECOMMEND;
         List<ResultElement> potentialResult = new ArrayList<ResultElement>();
         potentialResult.add(resultElements.get(0));
         for (int i = 1; i < resultElements.size(); i ++)
         {
             float scoreDiffTmp = resultElements.get(i - 1).getScore() - resultElements.get(i).getScore();
             
-            if (scoreDiffTmp > scoreDiff && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_PROTENTIAL)
+            if ((scoreDiffTmp > scoreDiff && scoreDiffTmp > Constants.SCORE_THRESHOLD_DIFF_RECOMMEND) ||
+                    resultElements.get(i).getScore() < scoreThreshold)
             {
                 break;
             }
@@ -243,31 +268,55 @@ public class CorrectionStep extends AbstractStep
      * @param targetElement
      * @return
      */
+//    private float getDistanceWithoutOrder(SentenceElement element, SentenceElement targetElement)
+//    {
+//        int maxLen = Math.max(element.getLength(), targetElement.getLength());
+//        int minLen = Math.min(element.getLength(), targetElement.getLength());
+//        float distance1 = (float) EditDistanceUtils.getEditDistanceWithoutOrder(element, targetElement);
+//        if (distance1 == 0)
+//        {
+//            return Constants.DISTANCE_TOTAL_MATCH_RATE * maxLen;
+//        }
+//        //target完全包含在片命中，例如我想看小美好
+//        else if (distance1 <= (maxLen - minLen) && targetElement.getLength() == minLen && minLen >= 3)
+//        {
+//            int matchParter = EditDistanceUtils.getMatchParterWithoutOrder(targetElement, element);
+//            if (matchParter <= 2)
+//            {
+//                return 0.0f;
+//            }
+//            else if ((maxLen - minLen) <= 2)
+//            {
+//                return 0.0f;
+//            }
+//            else
+//            {
+//                return distance1 * 0.8f + (maxLen - minLen) * 1.2f;
+//            }
+//        }
+//        else
+//        {
+//            return distance1 * 0.8f + (maxLen - minLen) * 1.2f;
+//        }
+//    }
+    
     private float getDistanceWithoutOrder(SentenceElement element, SentenceElement targetElement)
     {
         int maxLen = Math.max(element.getLength(), targetElement.getLength());
         int minLen = Math.min(element.getLength(), targetElement.getLength());
-        float distance1 = (float) EditDistanceUtils.getEditDistanceWithoutOrder(element, targetElement);
-        if (distance1 == 0)
+        float distance1 = (float) EditDistanceUtils.getEditDistanceWithoutOrderV2(element, targetElement);
+        if (distance1 == 0 && minLen >= 3)
         {
             return Constants.DISTANCE_TOTAL_MATCH_RATE * maxLen;
         }
         //target完全包含在片命中，例如我想看小美好
-        else if (distance1 <= (maxLen - minLen) && targetElement.getLength() == minLen && minLen >= 3)
+        else if (minLen >= 3 && targetElement.getLength() == minLen && EditDistanceUtils.isContains(element, targetElement, true))
         {
-            int matchParter = EditDistanceUtils.getMatchParterWithoutOrder(targetElement, element);
-            if (matchParter <= 2)
+            if (EditDistanceUtils.isEndWith(element, targetElement, true))
             {
                 return 0.0f;
             }
-            else if ((maxLen - minLen) <= 2)
-            {
-                return 0.0f;
-            }
-            else
-            {
-                return distance1 * 0.8f + (maxLen - minLen) * 1.2f;
-            }
+            return distance1 * 0.3f;
         }
         else
         {
@@ -338,5 +387,49 @@ public class CorrectionStep extends AbstractStep
             
         });
         return result;
+    }
+    
+    /**
+     * 当输入"啦啦啦啦啦啦"，solr结果返回"啦啦队之舞"，并且分数15.5，由于返回分数过高，导致后续的判断无法生效
+     * 所以当solr返回的分数过高时，将其调整到适当的范围
+     * 
+     * @param resultElements
+     * @return
+     */
+    private List<ResultElement> adjustSolrScore(List<ResultElement> resultElements)
+    {
+        for (ResultElement resultElement : resultElements)
+        {
+            if (resultElement.getScore() > Constants.SOLR_MAX_SCORE)
+            {
+                resultElement.setScore(Constants.SOLR_MAX_SCORE);
+            }
+        }
+        return resultElements;
+    }
+    
+    /**
+     * 去掉一些结果：
+     * 
+     * 1. 两个字对调，例如 京东 -> 东京
+     * 2. 输入是一个字，但是输出是多个字
+     * 
+     * @param ele1
+     * @param ele2
+     * @param distanceWithoutOrder
+     * @param distanceWithOrder
+     * @return
+     */
+    private boolean isExcludeCase(SentenceElement element, SentenceElement target, float distanceWithOrder, float distanceWithoutOrder)
+    {
+        if (target.getLength() == 1 && element.getLength() != 1)
+        {
+            return true;
+        }
+        if (target.getLength() == 2 && element.getLength() == 2 && distanceWithOrder >= 1)
+        {
+            return true;
+        }
+        return false;
     }
 }

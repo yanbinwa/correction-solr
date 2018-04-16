@@ -334,8 +334,8 @@ public class SolrUtils
     
     static class MyConstants
     {
-        private static String MOVIE_INFO = "专有词库>长虹>影视>电影";
-        //private static String TV_INFO = "专有词库>长虹>影视>电视剧";
+        //private static String MOVIE_INFO = "专有词库>长虹>影视>电影";
+        private static String MOVIE_INFO = "专有词库>长虹>非同义词>纠错目录";
         private static String[] LEVEL_INFOS = {MOVIE_INFO};
         //private static String[] LEVEL_INFOS = {MOVIE_INFO, TV_INFO};
         public static Set<String> level_infos = new HashSet<String>();
