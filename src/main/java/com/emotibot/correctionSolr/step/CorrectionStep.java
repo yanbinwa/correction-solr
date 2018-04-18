@@ -318,6 +318,11 @@ public class CorrectionStep extends AbstractStep
             }
             return distance1 * 0.3f;
         }
+        //如果长度大于等于4，且相差较小，可以减少差值
+        else if (minLen >= 4 && distance1 / (float) minLen <= 0.5f )
+        {
+            return distance1 * 0.6f + (maxLen - minLen) * 0.8f;
+        }
         else
         {
             return distance1 * 0.8f + (maxLen - minLen) * 1.2f;

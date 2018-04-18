@@ -46,7 +46,7 @@ public class CorrectionSolrServiceImpl implements CorrectionSolrService
     @Override
     public String getLikelyName(String text)
     {
-        text = CorrectionUtils.getLikelyCorrection(text);
+        text = CorrectionUtils.getLikelyCorrection2(text);
         return text;
     }
 
